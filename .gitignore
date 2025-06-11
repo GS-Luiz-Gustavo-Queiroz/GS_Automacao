@@ -1,0 +1,31 @@
+
+GS/Operacoes em PDF/_Manipulador de PDF - Tess/configs/
+
+.idea/
+
+*.pdf
+
+*.txt
+
+*.xlsx
+
+*.jpg
+
+*.json
+
+KMF/Conexão Gmail/edicao planilha/
+
+*.xls
+
+*.csv
+GS/Operacoes em PDF/_Manipulador de PDF - Tess/configs/tess/
+
+GS/Contas a Pagar/Arquivos/
+
+GS/Operacoes em PDF/_Manipulador de PDF/__pycache__/
+
+GS/Operacoes em PDF/_Manipulador de PDF/configs/__pycache__/
+
+GS/Operacoes em PDF/_Manipulador de PDF/configs/utils/__pycache__/
+
+GS/Operacoes em PDF/_Manipulador de PDF/configs/utils/functions/__pycache__/
