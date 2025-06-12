@@ -29,6 +29,7 @@ GS/Operacoes em PDF/_Manipulador de PDF/configs/__pycache__/
 GS/Operacoes em PDF/_Manipulador de PDF/configs/utils/__pycache__/
 
 GS/Operacoes em PDF/_Manipulador de PDF/configs/utils/functions/__pycache__/
+*.pyc
 *.ofx
 *.HTML
 *.XMLD
