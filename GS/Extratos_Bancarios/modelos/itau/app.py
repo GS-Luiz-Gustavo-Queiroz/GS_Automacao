@@ -3,15 +3,13 @@ import tkinter as tk
 from tkinter import filedialog
 import unicodedata
 import os
-import platform
 
-# NOVA FUNÇÃO: Conversor de XLS para XLSX (sem depender do Excel)
 def converter_xls_para_xlsx(caminho_arquivo):
     import xlrd
     from openpyxl import Workbook
 
     if not caminho_arquivo.lower().endswith('.xls'):
-        return caminho_arquivo  # já é .xlsx ou csv
+        return caminho_arquivo
 
     print("Convertendo .xls para .xlsx...")
     wb_xls = xlrd.open_workbook(caminho_arquivo)
@@ -104,7 +102,6 @@ def processar_csv(arquivo):
 def processar_dataframe(df, arquivo, nome_planilha):
     variacoes_cabecalhos = {
         'data': ['data', 'dataocorrencia', 'data_ocorrencia', 'Data_da_Ocorrencia', 'dataocorrência', 'data ocorrência'],
-        'valor': ['valor', 'valores', 'vlr', 'val'],
         'saldo': ['saldo', 'saldos', 'sld']
     }
 
@@ -138,30 +135,25 @@ def processar_dataframe(df, arquivo, nome_planilha):
         df_final.rename(columns=colunas_map, inplace=True)
 
         col_data = next((col for col in df_final.columns if 'data' in col), None)
-        col_valor = next((col for col in df_final.columns if 'valor' in col), None)
         col_saldo = next((col for col in df_final.columns if 'saldo' in col), None)
 
-        if not all([col_data, col_valor, col_saldo]):
+        if not all([col_data, col_saldo]):
             print("As colunas esperadas não foram encontradas")
             return
 
-        df_final = df_final[[col_data, col_valor, col_saldo]]
-        df_final.columns = ['Data_da_Ocorrencia', 'Valor', 'Saldo']
+        df_final = df_final[[col_data, col_saldo]]
+        df_final.columns = ['Data_da_Ocorrencia', 'Saldo']
 
         if linha_cabecalho == 0:
             df_final = df_final.iloc[1:]
 
-        df_final['Valor'] = df_final['Valor'].apply(formatar_contabil)
         df_final['Saldo'] = df_final['Saldo'].apply(formatar_contabil)
+        df_final = df_final[df_final['Saldo'] != '']  
 
-        if not pd.api.types.is_datetime64_any_dtype(df_final['Data_da_Ocorrencia']):
-            try:
-                pd.to_datetime(df_final['Data_da_Ocorrencia'], format='%d/%m/%Y', errors='raise')
-            except:
-                df_final['Data_da_Ocorrencia'] = pd.to_datetime(
-                    df_final['Data_da_Ocorrencia'],
-                    errors='coerce'
-                ).dt.strftime('%d/%m/%Y')
+        df_final['Data_da_Ocorrencia'] = pd.to_datetime(df_final['Data_da_Ocorrencia'], errors='coerce')
+        df_final = df_final.dropna(subset=['Data_da_Ocorrencia']) 
+        df_final = df_final.sort_values(by='Data_da_Ocorrencia')
+        df_final['Data_da_Ocorrencia'] = df_final['Data_da_Ocorrencia'].dt.strftime('%d/%m/%Y')
 
         print("\nDados extraídos e formatados")
         print(df_final.head())
@@ -181,7 +173,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
                 ws.append(row)
                 if r_idx > 1:
                     ws[f'B{r_idx}'].number_format = '#.##0,00_-'
-                    ws[f'C{r_idx}'].number_format = '#.##0,00_-'
 
             wb.save(nome_saida)
 

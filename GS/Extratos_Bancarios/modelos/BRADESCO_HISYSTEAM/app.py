@@ -88,7 +88,6 @@ def processar_csv(arquivo):
 def processar_dataframe(df, arquivo, nome_planilha):
     variacoes_cabecalhos = {
         'data': ['data', 'dataocorrencia', 'data_ocorrencia', 'Data_da_Ocorrencia', 'dataocorrência', 'data ocorrência'],
-        'valor': ['valor', 'valores', 'vlr', 'val'],
         'saldo': ['saldo', 'saldos', 'sld']
     }
 
@@ -122,18 +121,16 @@ def processar_dataframe(df, arquivo, nome_planilha):
         df_final.rename(columns=colunas_map, inplace=True)
 
         col_data = next((col for col in df_final.columns if 'data' in col), None)
-        col_valor = next((col for col in df_final.columns if 'valor' in col), None)
         col_saldo = next((col for col in df_final.columns if 'saldo' in col), None)
 
-        if not all([col_data, col_valor, col_saldo]):
+        if not all([col_data,  col_saldo]):
             print("As colunas esperadas não foram encontradas")
             return
 
-        df_final = df_final[[col_data, col_valor, col_saldo]]
-        df_final.columns = ['Data_da_Ocorrencia', 'Valor', 'Saldo']
+        df_final = df_final[[col_data,  col_saldo]]
+        df_final.columns = ['Data_da_Ocorrencia',  'Saldo']
         df_final = df_final.iloc[1:] if linha_cabecalho == 0 else df_final
 
-        df_final['Valor'] = df_final['Valor'].apply(formatar_contabil)
         df_final['Saldo'] = df_final['Saldo'].apply(formatar_contabil)
 
         if not pd.api.types.is_datetime64_any_dtype(df_final['Data_da_Ocorrencia']):

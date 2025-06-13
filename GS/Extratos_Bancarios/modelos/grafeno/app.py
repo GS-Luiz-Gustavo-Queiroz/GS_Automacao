@@ -70,12 +70,11 @@ def processar_csv(arquivo):
                 return
             except:
                 continue
-    print("Não foi possível ler o arquivo CSV ")
+    print("Não foi possível ler o arquivo CSV")
 
 def processar_dataframe(df, arquivo, nome_planilha):
     variacoes_cabecalhos = {
         'data': ['data', 'dataocorrencia', 'data_ocorrencia', 'Data_da_Ocorrencia', 'dataocorrência', 'data ocorrência'],
-        'valor': ['valor', 'valores', 'vlr', 'val'],
         'saldo': ['saldo', 'saldos', 'sld']
     }
 
@@ -109,22 +108,25 @@ def processar_dataframe(df, arquivo, nome_planilha):
         df_final.rename(columns=colunas_map, inplace=True)
 
         col_data = next((col for col in df_final.columns if 'data' in col), None)
-        col_valor = next((col for col in df_final.columns if 'valor' in col), None)
         col_saldo = next((col for col in df_final.columns if 'saldo' in col), None)
 
-        if not all([col_data, col_valor, col_saldo]):
-            print("As colunas esperadas não foram encontradas ")
+        if not all([col_data, col_saldo]):
+            print("As colunas esperadas não foram encontradas.")
             return
 
-        df_final = df_final[[col_data, col_valor, col_saldo]]
-        df_final.columns = ['Data_da_Ocorrencia', 'Valor', 'Saldo']
+        df_final = df_final[[col_data, col_saldo]]
+        df_final.columns = ['Data_da_Ocorrencia', 'Saldo']
 
         df_final = df_final.iloc[1:-1]
 
-        df_final['Valor'] = df_final['Valor'].apply(formatar_contabil)
         df_final['Saldo'] = df_final['Saldo'].apply(formatar_contabil)
 
-        df_final['Data_da_Ocorrencia'] = pd.to_datetime(df_final['Data_da_Ocorrencia'], errors='coerce').dt.strftime('%d/%m/%Y')
+        # Ordenar as datas
+        df_final['Data_da_Ocorrencia'] = pd.to_datetime(df_final['Data_da_Ocorrencia'], errors='coerce')
+        df_final = df_final.sort_values(by='Data_da_Ocorrencia')
+
+        # Formatar como texto dd/mm/yyyy
+        df_final['Data_da_Ocorrencia'] = df_final['Data_da_Ocorrencia'].dt.strftime('%d/%m/%Y')
 
         print("\nDados extraídos e formatados")
         print(df_final.head())
@@ -144,11 +146,10 @@ def processar_dataframe(df, arquivo, nome_planilha):
                 ws.append(row)
                 if r_idx > 1:
                     ws[f'B{r_idx}'].number_format = '#.##0,00_-'
-                    ws[f'C{r_idx}'].number_format = '#.##0,00_-'
 
             wb.save(nome_saida)
 
-        print(f"\nNovo arquivo criado  {nome_saida}")
+        print(f"\nNovo arquivo criado: {nome_saida}")
     else:
         print(df.head())
 
