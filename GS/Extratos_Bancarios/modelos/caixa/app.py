@@ -3,8 +3,6 @@ import tkinter as tk
 from tkinter import filedialog
 import unicodedata
 import os
-from openpyxl import load_workbook
-from openpyxl.styles import PatternFill
 
 def selecionar_arquivo():
     root = tk.Tk()
@@ -67,53 +65,39 @@ def encontrar_colunas(df):
         if any(v in col_norm for v in variacoes_debcred) and col_debcred is None:
             col_debcred = col
     
-    if col_data is None or col_valor is None:
-        raise ValueError("Não foi possível encontrar as colunas 'Data_Mov' e 'Valor'")
+    if col_data is None or col_valor is None or col_debcred is None:
+        raise ValueError("Não foi possível encontrar as colunas 'Data_Mov', 'Valor' e 'Deb_Cred'")
     
     return col_data, col_valor, col_debcred
 
-def salvar_data_valor(df, arquivo_origem):
-    col_data, col_valor, col_debcred = encontrar_colunas(df)
-    
-    colunas_para_exportar = [col_data, col_valor]
-    novos_nomes = ['Data_Mov', 'Valor']
-    
-    if col_debcred:
-        colunas_para_exportar.append(col_debcred)
-        novos_nomes.append('Deb_Cred')
-    
-    df_out = df[colunas_para_exportar].copy()
-    df_out.columns = novos_nomes
+def processar_saldos_por_dia(df, col_data, col_valor, col_debcred):
+    # Converter data
+    df[col_data] = pd.to_datetime(df[col_data], format='%Y%m%d', errors='coerce')
+    df = df.dropna(subset=[col_data, col_valor, col_debcred])
 
-    nome_saida = criar_nome_arquivo_saida(arquivo_origem, "data_valor")
-    df_out.to_excel(nome_saida, index=False)
+    # Normalizar coluna Deb_Cred
+    df[col_debcred] = df[col_debcred].astype(str).str.strip().str.upper()
 
-    if 'Deb_Cred' in df_out.columns:
-        colorir_linhas(nome_saida, 'Deb_Cred')
+    # Converter valor para float
+    df[col_valor] = pd.to_numeric(df[col_valor], errors='coerce')
+    df = df.dropna(subset=[col_valor])
 
-    print(f"Arquivo com Data_Mov, Valor{', Deb_Cred' if col_debcred else ''} salvo em:\n{os.path.abspath(nome_saida)}")
+    # Aplicar sinal negativo aos débitos
+    df['Valor_Ajustado'] = df.apply(
+        lambda row: -row[col_valor] if row[col_debcred] == 'D' else row[col_valor],
+        axis=1
+    )
 
-def colorir_linhas(caminho_arquivo, coluna_debcred):
-    wb = load_workbook(caminho_arquivo)
-    ws = wb.active
+    # Agrupar por data e somar
+    resultado = df.groupby(df[col_data].dt.strftime('%d/%m/%Y'))['Valor_Ajustado'].sum().reset_index()
+    resultado.columns = ['Data_da_Ocorrencia', 'Saldo']
 
-    azul = PatternFill(start_color='87CEFA', end_color='87CEFA', fill_type='solid')  #cor azul
-    vermelho = PatternFill(start_color='FA8072', end_color='FA8072', fill_type='solid')  #cor vermelha
+    return resultado
 
-    header = [cell.value for cell in ws[1]]
-    idx_debcred = header.index('Deb_Cred') + 1
-
-    for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-        valor = row[idx_debcred - 1].value
-        if isinstance(valor, str):
-            if valor.strip().upper() == 'C':
-                for cell in row:
-                    cell.fill = azul
-            elif valor.strip().upper() == 'D':
-                for cell in row:
-                    cell.fill = vermelho
-
-    wb.save(caminho_arquivo)
+def salvar_resultado(resultado, arquivo_origem):
+    nome_saida = criar_nome_arquivo_saida(arquivo_origem, "saldo_por_dia")
+    resultado.to_excel(nome_saida, index=False)
+    print(f"\nArquivo com saldo diário salvo em:\n{os.path.abspath(nome_saida)}")
 
 def main():
     arquivo = selecionar_arquivo()
@@ -122,7 +106,9 @@ def main():
         return
     try:
         df = carregar_dados(arquivo)
-        salvar_data_valor(df, arquivo)
+        col_data, col_valor, col_debcred = encontrar_colunas(df)
+        resultado = processar_saldos_por_dia(df, col_data, col_valor, col_debcred)
+        salvar_resultado(resultado, arquivo)
     except Exception as e:
         print(f"Erro: {e}")
 

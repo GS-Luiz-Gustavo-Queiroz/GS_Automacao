@@ -35,12 +35,11 @@ def formatar_contabil(valor):
         return ""
     try:
         valor = float(valor)
-        return f"{valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')  # Mantém 2 casas decimais
+        return f"{valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') 
     except:
         return str(valor)
 
 def calcular_saldo_total_por_dia(df, valor_saldo_anterior):
-    # Converter 'Valor' para float, lidando com formatação
     def converter_valor(valor):
         try:
             if isinstance(valor, str):
@@ -67,15 +66,12 @@ def calcular_saldo_total_por_dia(df, valor_saldo_anterior):
     saldo_dict.update(zip(df_agrupado['Data_da_Ocorrencia'].dt.strftime('%d/%m/%Y'), 
                           [formatar_contabil(s) for s in saldos_por_dia[1:]]))
 
-    # Identificar as últimas linhas de cada data
     ultima_linha_data = df.groupby('Data_da_Ocorrencia').tail(1).index
 
-    # Preencher 'Saldo_Total' apenas para as últimas linhas de cada data
     saldos = pd.Series([""] * len(df), index=df.index)
     for idx in ultima_linha_data:
         data_str = df.at[idx, 'Data_da_Ocorrencia'].strftime('%d/%m/%Y') if pd.notna(df.at[idx, 'Data_da_Ocorrencia']) else ""
-        saldos.at[idx] = df.at[idx, 'Valor']  # Mostra o valor da própria linha (já formatado)
-
+        saldos.at[idx] = df.at[idx, 'Valor']  
     return saldos, ultima_linha_data
 
 
@@ -137,7 +133,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
             print(f"Cabeçalhos encontrados: {colunas_originais}")
             break
 
-    # Procurar valor do Saldo Anterior
     valor_saldo_anterior = None
     for idx, row in df.iterrows():
         linha_normalizada = [normalizar_texto(str(cell)) for cell in row.values]
@@ -178,8 +173,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
         df_final = df_final[[col_data, col_valor]]
         df_final.columns = ['Data_da_Ocorrencia', 'Valor']
 
-        # Não remover a primeira linha nem as últimas 8 linhas
-        # Não remover a última linha de cada data
 
         df_final['Valor'] = df_final['Valor'].apply(formatar_contabil)
 
@@ -187,7 +180,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
             df_final['Data_da_Ocorrencia'], errors='coerce', dayfirst=True
         ).dt.strftime('%d/%m/%Y')
 
-        # Adicionar a linha do Saldo Anterior no início
         if valor_saldo_anterior is not None:
             linha_saldo_anterior = pd.DataFrame({
                 'Data_da_Ocorrencia': [""],
@@ -195,13 +187,11 @@ def processar_dataframe(df, arquivo, nome_planilha):
             })
             df_final = pd.concat([linha_saldo_anterior, df_final], ignore_index=True)
 
-        # Calcular a coluna Saldo_Total com base nas somas diárias, ajustando a última data de cada mês
         saldos, ultima_linha_data = calcular_saldo_total_por_dia(df_final, valor_saldo_anterior)
 
-        # Aplicar negrito ao valor da última linha de cada data no console
         df_final_display = df_final.copy()
         for idx in ultima_linha_data:
-            if idx > 0:  # Ignorar a linha do Saldo Anterior (índice 0)
+            if idx > 0:  
                 df_final_display.at[idx, 'Valor'] = f"**{df_final.at[idx, 'Valor']}**"
 
         df_final['Saldo_Total'] = saldos
@@ -209,7 +199,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
         print("\nDados extraídos e formatados:")
         print(df_final_display.head())
         
-        # Verificar as duas últimas linhas do DataFrame resultante
         if len(df_final) >= 2:
             print("\nDuas últimas linhas do DataFrame:")
             print(df_final_display.tail(2))
@@ -227,16 +216,13 @@ def processar_dataframe(df, arquivo, nome_planilha):
             ws = wb.active
             ws.title = 'Dados Extraídos'
 
-            # Mapear índices originais para linhas no Excel
-            data_indices = {idx: i for i, idx in enumerate(df_final.index) if i > 0}  # Ignorar linha 0 (Saldo Anterior)
-
+            data_indices = {idx: i for i, idx in enumerate(df_final.index) if i > 0}  
             for r_idx, row in enumerate(dataframe_to_rows(df_final, index=False, header=True), 1):
                 ws.append(row)
-                if r_idx > 1:  # Ignorar a linha do Saldo Anterior e o cabeçalho
+                if r_idx > 1: 
                     ws[f'B{r_idx}'].number_format = '#.##0,00_-'
                     ws[f'C{r_idx}'].number_format = '#.##0,00_-'
-                    # Aplicar negrito à última linha de cada data usando o mapeamento de índices
-                    original_idx = df_final.index[r_idx - 2]  # Ajuste para alinhar com os dados (ignorando cabeçalho)
+                    original_idx = df_final.index[r_idx - 2]  
                     if original_idx in ultima_linha_data:
                         ws[f'B{r_idx}'].font = Font(bold=True)
 
