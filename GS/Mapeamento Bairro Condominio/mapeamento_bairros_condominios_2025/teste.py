@@ -1,4 +1,3 @@
-import time
+import captura_dados_faltantes
 
-time.sleep(5)
-print("Hello World!")
+captura_dados_faltantes.captura_dados_faltantes_api("dataset_test.csv")
