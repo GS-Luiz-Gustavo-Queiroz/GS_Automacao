@@ -113,9 +113,8 @@ def captura_dados_faltantes_api(nome_do_arquivo):
             pass
 
         os.system('cls' if os.name == 'nt' else 'clear') #limpar terminal
-
-        
         print(f"{i+1} de {len(dataset)}")
+        
         time.sleep(21)
 
     dataset.to_csv("incrementado_"+nome_do_arquivo, index=False, encoding='latin1')

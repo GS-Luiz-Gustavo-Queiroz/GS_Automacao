@@ -1,3 +1,3 @@
 import captura_dados_faltantes
 
-captura_dados_faltantes.captura_dados_faltantes_api("dataset_test.csv")
+captura_dados_faltantes.captura_dados_faltantes_api("condominios_total_parte1.csv")
