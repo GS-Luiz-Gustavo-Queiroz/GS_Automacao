@@ -6,11 +6,14 @@ import os
 
 def selecionar_arquivo():
     root = tk.Tk()
+    root.update()
     root.withdraw()
-    return filedialog.askopenfilename(
+    caminho = filedialog.askopenfilename(
         title="Selecione o arquivo",
-        filetypes=[("Arquivos Excel/CSV", "*.xlsx *.xls *.csv"), ("Todos os arquivos", "*.*")]
+        filetypes=[("Arquivos Excel/CSV/TXT", "*.xlsx *.xls *.csv *.txt"), ("Todos os arquivos", "*.*")]
     )
+    root.destroy()
+    return caminho
 
 def normalizar_texto(texto):
     if not isinstance(texto, str):
@@ -18,163 +21,62 @@ def normalizar_texto(texto):
     texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('ASCII')
     return ''.join(c for c in texto if c.isalnum() or c.isspace()).strip().lower()
 
-def criar_nome_arquivo_saida(arquivo_original, nome_planilha):
-    base, ext = os.path.splitext(arquivo_original)
-    contador = 1
-    while True:
-        novo_nome = f"{base}_extraido_{nome_planilha}_{contador}.xlsx"
-        if not os.path.exists(novo_nome):
-            return novo_nome
-        contador += 1
+def detectar_delimitador(arquivo):
+    with open(arquivo, 'r', encoding='latin1') as f:
+        linha = f.readline()
+        for sep in [',', ';', '\t', '|']:
+            if sep in linha:
+                return sep
+    return ','
 
-def formatar_contabil(valor):
-    if pd.isna(valor):
-        return ""
-    try:
-        valor = float(valor)
-        return f"{valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-    except:
-        return str(valor)
-
-def converter_xls_para_xlsx(arquivo):
-    print(f"Convertendo arquivo .xls para .xlsx: {arquivo}")
-    df_dict = pd.read_excel(arquivo, sheet_name=None, engine='xlrd')
-    novo_arquivo = arquivo.replace('.xls', '_convertido.xlsx')
-    with pd.ExcelWriter(novo_arquivo, engine='openpyxl') as writer:
-        for nome, df in df_dict.items():
-            df.to_excel(writer, sheet_name=nome, index=False)
-    print(f"Arquivo convertido salvo como: {novo_arquivo}")
-    return novo_arquivo
-
-def extrair_dados(arquivo):
-    try:
-        if arquivo.lower().endswith('.xls'):
-            arquivo = converter_xls_para_xlsx(arquivo)
-
-        if arquivo.lower().endswith('.xlsx'):
-            xls = pd.ExcelFile(arquivo)
-            processar_excel(xls, arquivo)
-        elif arquivo.lower().endswith('.csv'):
-            processar_csv(arquivo)
-        else:
-            print("Formato de arquivo não suportado.")
-    except Exception as e:
-        print(f"Ocorreu um erro: {e}")
-
-def processar_excel(xls, arquivo):
-    for sheet_name in xls.sheet_names:
-        print(f"\nProcessando planilha: {sheet_name}")
-        try:
-            df = pd.read_excel(arquivo, sheet_name=sheet_name, header=None)
-            processar_dataframe(df, arquivo, sheet_name)
-        except Exception as e:
-            print(f"Erro ao processar planilha {sheet_name}: {e}")
-
-def processar_csv(arquivo):
-    print("\nProcessando arquivo CSV")
-    encodings = ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']
-    separadores = [',', ';', '\t']
-    for encoding in encodings:
-        for sep in separadores:
-            try:
-                df = pd.read_csv(arquivo, header=None, encoding=encoding, sep=sep)
-                print(f"Arquivo lido com encoding {encoding} e separador '{sep}'")
-                processar_dataframe(df, arquivo, "CSV")
-                return
-            except:
-                continue
-    print("Não foi possível ler o arquivo CSV")
-
-def processar_dataframe(df, arquivo, nome_planilha):
-    variacoes_cabecalhos = {
-        'data': ['data', 'dataocorrencia', 'data_ocorrencia', 'Data_da_Ocorrencia', 'dataocorrência', 'data ocorrência'],
-        'saldo': ['saldo', 'saldos', 'sld']
-    }
-
-    linha_cabecalho = None
-    colunas_originais = []
-
-    for idx, linha in df.iterrows():
-        linha_normalizada = [normalizar_texto(str(cell)) for cell in linha.values]
-        encontrados = {key: False for key in variacoes_cabecalhos}
-        for col in linha_normalizada:
-            for key, variacoes in variacoes_cabecalhos.items():
-                if any(v in col for v in variacoes):
-                    encontrados[key] = True
-        if all(encontrados.values()):
-            linha_cabecalho = idx
-            colunas_originais = [str(cell).strip() for cell in linha.values]
-            print(f"Cabeçalhos encontrados: {colunas_originais}")
-            break
-
-    if linha_cabecalho is not None:
-        print(f"Encontrados cabeçalhos na linha {linha_cabecalho + 1}")
-
-        if nome_planilha == "CSV":
-            df_final = pd.read_csv(arquivo, header=linha_cabecalho)
-        else:
-            df_final = pd.read_excel(arquivo, sheet_name=nome_planilha, header=linha_cabecalho)
-
-        df_final = df_final.dropna(how='all')
-
-        colunas_map = {col: normalizar_texto(col) for col in df_final.columns}
-        df_final.rename(columns=colunas_map, inplace=True)
-
-        col_data = next((col for col in df_final.columns if 'data' in col), None)
-        col_saldo = next((col for col in df_final.columns if 'saldo' in col), None)
-
-        if not all([col_data,  col_saldo]):
-            print("As colunas esperadas não foram encontradas")
-            return
-
-        df_final = df_final[[col_data,  col_saldo]]
-        df_final.columns = ['Data_da_Ocorrencia',  'Saldo']
-        df_final = df_final.iloc[1:] if linha_cabecalho == 0 else df_final
-
-        df_final['Saldo'] = df_final['Saldo'].apply(formatar_contabil)
-
-        if not pd.api.types.is_datetime64_any_dtype(df_final['Data_da_Ocorrencia']):
-            try:
-                pd.to_datetime(df_final['Data_da_Ocorrencia'], format='%d/%m/%Y', errors='raise')
-            except:
-                df_final['Data_da_Ocorrencia'] = pd.to_datetime(
-                    df_final['Data_da_Ocorrencia'], errors='coerce'
-                ).dt.strftime('%d/%m/%Y')
-
-        print("\nDados extraídos e formatados")
-        print(df_final.head())
-
-        nome_saida = criar_nome_arquivo_saida(arquivo, nome_planilha)
-        if nome_planilha == "CSV":
-            df_final.to_csv(nome_saida, index=False, encoding='utf-8')
-        else:
-            from openpyxl import Workbook
-            from openpyxl.utils.dataframe import dataframe_to_rows
-
-            wb = Workbook()
-            ws = wb.active
-            ws.title = 'Dados Extraídos'
-
-            for r_idx, row in enumerate(dataframe_to_rows(df_final, index=False, header=True), 1):
-                ws.append(row)
-                if r_idx > 1:
-                    ws[f'B{r_idx}'].number_format = '#.##0,00_-'
-                    ws[f'C{r_idx}'].number_format = '#.##0,00_-'
-
-            wb.save(nome_saida)
-
-        print(f"\nNovo arquivo criado: {nome_saida}")
+def carregar_dados_com_linha_2_como_cabecalho(arquivo):
+    ext = arquivo.lower().split('.')[-1]
+    if ext in ['xls', 'xlsx']:
+        return pd.read_excel(arquivo, header=1)
+    elif ext in ['csv', 'txt']:
+        sep = detectar_delimitador(arquivo)
+        return pd.read_csv(arquivo, sep=sep, encoding='latin1', header=1, on_bad_lines='skip')
     else:
-        print("Cabeçalhos não encontrados. Visualização das primeiras linhas:")
-        print(df.head())
+        raise ValueError("Formato de arquivo não suportado")
+
+def extrair_colunas_data_saldo(df):
+    col_data = col_saldo = None
+    for col in df.columns:
+        nome_normalizado = normalizar_texto(col)
+        if 'data' in nome_normalizado and col_data is None:
+            col_data = col
+        if 'saldo' in nome_normalizado and col_saldo is None:
+            col_saldo = col
+    if not col_data or not col_saldo:
+        raise ValueError("Colunas 'data' e 'saldo' não encontradas na linha 2.")
+    
+    df_filtrado = df[[col_data, col_saldo]].copy()
+    
+    # Converter a coluna 'saldo' para numérico, garantindo que seja uma Series
+    df_filtrado[col_saldo] = pd.to_numeric(df_filtrado[col_saldo], errors='coerce')
+    
+    # Remover linhas com valores NaN na coluna 'saldo'
+    df_filtrado = df_filtrado.dropna(subset=[col_saldo])
+    
+    return df_filtrado
+
+def salvar_arquivo_saida(df_filtrado, caminho_origem):
+    base, _ = os.path.splitext(caminho_origem)
+    caminho_saida = f"{base}_data_e_saldo.xlsx"
+    df_filtrado.to_excel(caminho_saida, index=False)
+    print(f"\n✔ Arquivo gerado: {caminho_saida}")
 
 def main():
-    arquivo = selecionar_arquivo()
-    if arquivo:
-        print(f"\nArquivo selecionado: {arquivo}")
-        extrair_dados(arquivo)
-    else:
+    caminho = selecionar_arquivo()
+    if not caminho:
         print("Nenhum arquivo selecionado.")
+        return
+    try:
+        df = carregar_dados_com_linha_2_como_cabecalho(caminho)
+        df_filtrado = extrair_colunas_data_saldo(df)
+        salvar_arquivo_saida(df_filtrado, caminho)
+    except Exception as e:
+        print(f"\n Erro: {e}")
 
 if __name__ == "__main__":
     main()
