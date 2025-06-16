@@ -4,14 +4,16 @@ from tkinter import filedialog
 import unicodedata
 import os
 import platform
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.styles import Font
 
-# NOVA FUNÇÃO: Conversor de XLS para XLSX (sem depender do Excel)
 def converter_xls_para_xlsx(caminho_arquivo):
     import xlrd
     from openpyxl import Workbook
 
     if not caminho_arquivo.lower().endswith('.xls'):
-        return caminho_arquivo  # já é .xlsx ou csv
+        return caminho_arquivo 
 
     print("Convertendo .xls para .xlsx...")
     wb_xls = xlrd.open_workbook(caminho_arquivo)
@@ -48,7 +50,7 @@ def criar_nome_arquivo_saida(arquivo_original, nome_planilha):
     base, ext = os.path.splitext(arquivo_original)
     contador = 1
     while True:
-        novo_nome = f"{base}_extraido_{nome_planilha}_{contador}{ext}"
+        novo_nome = f"{base}_extraido_{nome_planilha}_{contador}.xlsx"
         if not os.path.exists(novo_nome):
             return novo_nome
         contador += 1
@@ -104,13 +106,10 @@ def processar_csv(arquivo):
 def processar_dataframe(df, arquivo, nome_planilha):
     variacoes_cabecalhos = {
         'data': ['data', 'dataocorrencia', 'data_ocorrencia', 'data_da_ocorrencia', 'dataocorrência', 'data ocorrência'],
-        'valor': ['valor', 'valores', 'vlr', 'val'],
         'saldo': ['saldo', 'saldos', 'sld']
     }
 
     linha_cabecalho = None
-    colunas_originais = []
-
     for idx, linha in df.iterrows():
         linha_normalizada = [normalizar_texto(str(cell)) for cell in linha.values]
         encontrados = {key: False for key in variacoes_cabecalhos}
@@ -120,72 +119,46 @@ def processar_dataframe(df, arquivo, nome_planilha):
                     encontrados[key] = True
         if all(encontrados.values()):
             linha_cabecalho = idx
-            colunas_originais = [str(cell).strip() for cell in linha.values]
-            print(f"Cabeçalhos encontrados: {colunas_originais}")
             break
 
     if linha_cabecalho is not None:
         print(f"Encontrados cabeçalhos na linha {linha_cabecalho + 1}")
 
-        if nome_planilha == "CSV":
-            df_final = pd.read_csv(arquivo, header=linha_cabecalho)
-        else:
-            df_final = pd.read_excel(arquivo, sheet_name=nome_planilha, header=linha_cabecalho)
+        df.columns = df.iloc[linha_cabecalho]
+        df = df.drop(index=range(0, linha_cabecalho + 1))
+        df = df.dropna(how='all')
 
-        df_final = df_final.dropna(how='all')
+        col_data = next((col for col in df.columns if 'data' in normalizar_texto(str(col))), None)
+        col_saldo = next((col for col in df.columns if 'saldo' in normalizar_texto(str(col))), None)
 
-        colunas_map = {col: normalizar_texto(col) for col in df_final.columns}
-        df_final.rename(columns=colunas_map, inplace=True)
-
-        col_data = next((col for col in df_final.columns if 'data' in col), None)
-        colunas_valor = [col for col in df_final.columns if 'valor' in col]
-        col_valor = colunas_valor[1] if len(colunas_valor) >= 2 else (colunas_valor[0] if colunas_valor else None)
-        col_saldo = next((col for col in df_final.columns if 'saldo' in col), None)
-
-        if not all([col_data, col_valor, col_saldo]):
+        if not all([col_data, col_saldo]):
             print("As colunas esperadas não foram encontradas")
             return
 
-        df_final = df_final[[col_data, col_valor, col_saldo]]
-        df_final.columns = ['Data_da_Ocorrencia', 'Valor', 'Saldo']
+        df = df[[col_data, col_saldo]].rename(columns={col_data: 'Data', col_saldo: 'Saldo'})
 
-        if linha_cabecalho == 0:
-            df_final = df_final.iloc[1:]
+        df['Data'] = pd.to_datetime(df['Data'], dayfirst=True, errors='coerce')
+        df['Saldo'] = df['Saldo'].apply(lambda x: float(str(x).replace('.', '').replace(',', '.')) if pd.notna(x) else 0.0)
+        df = df.dropna(subset=['Data'])
 
-        df_final['Valor'] = df_final['Valor'].apply(formatar_contabil)
-        df_final['Saldo'] = df_final['Saldo'].apply(formatar_contabil)
-
-        if not pd.api.types.is_datetime64_any_dtype(df_final['Data_da_Ocorrencia']):
-            try:
-                pd.to_datetime(df_final['Data_da_Ocorrencia'], format='%d/%m/%Y', errors='raise')
-            except:
-                df_final['Data_da_Ocorrencia'] = pd.to_datetime(
-                    df_final['Data_da_Ocorrencia'],
-                    errors='coerce'
-                ).dt.strftime('%d/%m/%Y')
-
-        print("\nDados extraídos e formatados")
-        print(df_final.head())
+        df_filtrado = df.sort_values('Data').groupby(df['Data'].dt.date, as_index=False).last()
+        df_filtrado['Data'] = pd.to_datetime(df_filtrado['Data']).dt.strftime('%d/%m/%Y')
+        df_filtrado['Saldo'] = df_filtrado['Saldo'].apply(formatar_contabil)
 
         nome_saida = criar_nome_arquivo_saida(arquivo, nome_planilha)
-        if nome_planilha == "CSV":
-            df_final.to_csv(nome_saida, index=False, encoding='utf-8')
-        else:
-            from openpyxl import Workbook
-            from openpyxl.utils.dataframe import dataframe_to_rows
+        wb = Workbook()
+        ws = wb.active
+        ws.title = 'Saldo por Dia'
 
-            wb = Workbook()
-            ws = wb.active
-            ws.title = 'Dados Extraídos'
+        for r in dataframe_to_rows(df_filtrado, index=False, header=True):
+            ws.append(r)
 
-            for r_idx, row in enumerate(dataframe_to_rows(df_final, index=False, header=True), 1):
-                ws.append(row)
-                if r_idx > 1:
-                    ws[f'B{r_idx}'].number_format = '#.##0,00_-'
-                    ws[f'C{r_idx}'].number_format = '#.##0,00_-'
+        for row in ws.iter_rows(min_row=2, min_col=2, max_col=2):
+            for cell in row:
+                cell.number_format = '#.##0,00_-'
+                cell.font = Font(bold=True)
 
-            wb.save(nome_saida)
-
+        wb.save(nome_saida)
         print(f"\nNovo arquivo criado: {nome_saida}")
     else:
         print("Cabeçalhos não encontrados. Visualização das primeiras linhas:")

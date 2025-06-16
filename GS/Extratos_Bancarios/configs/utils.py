@@ -11,7 +11,7 @@ def data_to_excel(data: List[List[str]], path: str) -> None:
     :param data: Lista de registros.
     :param path: Caminho até o arquivo.
     """
-    df = pd.DataFrame(data, columns=['Data_da_Ocorrencia', 'Saldo'])
+    df = pd.DataFrame(data, columns=['Data', 'Saldo'])
     new_path = path[:path.rfind('/')+1] + 'formadato ' + ' '.join(path[path.rfind('/')+1:].split()[0:2]) + '.xlsx'
     df.to_excel(new_path, index=False)
 
