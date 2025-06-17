@@ -14,10 +14,10 @@ def eh_registro(row: str) -> bool:
 
 
 def spx_vision(path: str) -> None:
-    rows: List[List[str]] = get_text_from_pdf(path)
+    pages: List[List[str]] = get_text_from_pdf(path)
     registros: List[List[str]] = []
 
-    for page in rows:
+    for page in pages:
         for row in page:
             if not eh_registro(row):
                 continue
