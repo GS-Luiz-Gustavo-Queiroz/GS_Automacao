@@ -1,15 +1,5 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog
 import os
-
-def selecionar_arquivo():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askopenfilename(
-        title="Selecione o arquivo Excel ou CSV",
-        filetypes=[("Arquivos Excel/CSV", "*.xls *.xlsx *.csv")]
-    )
 
 def extrair_e_salvar_colunas(caminho_arquivo):
     extensao = os.path.splitext(caminho_arquivo)[1].lower()
@@ -32,12 +22,21 @@ def extrair_e_salvar_colunas(caminho_arquivo):
         df['Data'] = pd.to_datetime(df['Data'], dayfirst=True, errors='coerce')
         df = df.dropna(subset=['Data'])
 
-        df['Data'] = df['Data'].dt.date
+        # Criar coluna apenas com o dia (sem hora)
+        df['Data_Dia'] = df['Data'].dt.date
 
-        df_final = df.sort_values('Data').groupby('Data', as_index=False).last()
+        # Ordenar pela data completa (com hora se houver)
+        df = df.sort_values('Data')
 
-        df_final['Data'] = df_final['Data'].apply(lambda x: x.strftime("%d/%m/%Y"))
+        # Pegar a última ocorrência de cada dia
+        df_final = df.groupby('Data_Dia', as_index=False).tail(1).copy()
 
+        # Formatar a data para dd/mm/yyyy
+        df_final['Data'] = df_final['Data'].dt.strftime("%d/%m/%Y")
+
+        df_final = df_final[['Data', 'Saldo']]
+
+        # Salvar
         novo_caminho = os.path.join(os.path.dirname(caminho_arquivo), 'dados_extraidos.xlsx')
         df_final.to_excel(novo_caminho, index=False)
 
@@ -46,7 +45,9 @@ def extrair_e_salvar_colunas(caminho_arquivo):
     except Exception as e:
         print("Erro ao processar o arquivo:", e)
 
-if __name__ == "__main__":
-    caminho = selecionar_arquivo()
-    if caminho:
-        extrair_e_salvar_colunas(caminho)
+def CEF_FOLK(path: str):
+    if os.path.isfile(path):
+        print(f"\nArquivo recebido: {path}")
+        extrair_e_salvar_colunas(path)
+    else:
+        print("Arquivo não encontrado:", path)

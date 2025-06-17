@@ -1,16 +1,8 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog
 import unicodedata
 import os
-
-def selecionar_arquivo():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askopenfilename(
-        title="Selecione o arquivo",
-        filetypes=[("Arquivos Excel/CSV", "*.xlsx *.xls *.csv"), ("Todos os arquivos", "*.*")]
-    )
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 def normalizar_texto(texto):
     if not isinstance(texto, str):
@@ -36,13 +28,13 @@ def formatar_contabil(valor):
     except:
         return str(valor)
 
-def extrair_dados(arquivo):
+def extrair_dados(path):
     try:
-        if arquivo.lower().endswith(('.xlsx', '.xls')):
-            xls = pd.ExcelFile(arquivo)
-            processar_excel(xls, arquivo)
-        elif arquivo.lower().endswith('.csv'):
-            processar_csv(arquivo)
+        if path.lower().endswith(('.xlsx', '.xls')):
+            xls = pd.ExcelFile(path)
+            processar_excel(xls, path)
+        elif path.lower().endswith('.csv'):
+            processar_csv(path)
         else:
             print("Formato de arquivo não suportado.")
     except Exception as e:
@@ -133,9 +125,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
         if nome_planilha == "CSV":
             df_final.to_csv(nome_saida, index=False, encoding='utf-8')
         else:
-            from openpyxl import Workbook
-            from openpyxl.utils.dataframe import dataframe_to_rows
-
             wb = Workbook()
             ws = wb.active
             ws.title = 'Dados Extraídos'
@@ -149,15 +138,12 @@ def processar_dataframe(df, arquivo, nome_planilha):
 
         print(f"\nNovo arquivo criado: {nome_saida}")
     else:
+        print("Cabeçalhos não encontrados nas primeiras linhas:")
         print(df.head())
 
-def main():
-    arquivo = selecionar_arquivo()
-    if arquivo:
-        print(f"\nArquivo selecionado: {arquivo}")
-        extrair_dados(arquivo)
+def GRAFENO_HITEC(path: str):
+    if os.path.isfile(path):
+        print(f"\nArquivo recebido: {path}")
+        extrair_dados(path)
     else:
-        print("Nenhum arquivo selecionado.")
-
-if __name__ == "__main__":
-    main()
+        print(f"Arquivo não encontrado: {path}")

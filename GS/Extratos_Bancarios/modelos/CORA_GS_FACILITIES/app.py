@@ -1,17 +1,7 @@
 import pdfplumber
 import pandas as pd
 import re
-import tkinter as tk
-from tkinter import filedialog
 import os
-
-def selecionar_pdf():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askopenfilename(
-        title="Selecione o arquivo PDF",
-        filetypes=[("Arquivos PDF", "*.pdf")]
-    )
 
 def extrair_dados_do_pdf(caminho_pdf):
     dados = []
@@ -32,9 +22,9 @@ def extrair_dados_do_pdf(caminho_pdf):
                 match = palavra_chave.search(texto)
                 if match:
                     comecar_a_extrair = True
-                    texto = texto[match.end():]     
+                    texto = texto[match.end():]
                 else:
-                    continue  
+                    continue
 
             datas = padrao_data.findall(texto)
             saldos = padrao_saldo.findall(texto)
@@ -62,10 +52,12 @@ def salvar_em_excel(dados, caminho_pdf):
 
     caminho_excel = os.path.join(os.path.dirname(caminho_pdf), "dados_extraidos_do_pdf.xlsx")
     df.to_excel(caminho_excel, index=False)
-    print(f" Arquivo salvo com sucesso em: {caminho_excel}")
+    print(f"\nArquivo salvo com sucesso em: {caminho_excel}")
 
-if __name__ == "__main__":
-    caminho = selecionar_pdf()
-    if caminho:
-        dados_extraidos = extrair_dados_do_pdf(caminho)
-        salvar_em_excel(dados_extraidos, caminho)
+def CORA_GS_FACILITIES(path: str):
+    if os.path.isfile(path):
+        print(f"\nArquivo PDF recebido: {path}")
+        dados_extraidos = extrair_dados_do_pdf(path)
+        salvar_em_excel(dados_extraidos, path)
+    else:
+        print(f"Arquivo não encontrado: {path}")

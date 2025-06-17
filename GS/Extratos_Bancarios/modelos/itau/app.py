@@ -1,8 +1,8 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog
 import unicodedata
 import os
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 def converter_xls_para_xlsx(caminho_arquivo):
     import xlrd
@@ -27,14 +27,6 @@ def converter_xls_para_xlsx(caminho_arquivo):
     wb_xlsx.save(novo_arquivo)
     print(f"Arquivo convertido para: {novo_arquivo}")
     return novo_arquivo
-
-def selecionar_arquivo():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askopenfilename(
-        title="Selecione o arquivo",
-        filetypes=[("Arquivos Excel/CSV", "*.xlsx *.xls *.csv"), ("Todos os arquivos", "*.*")]
-    )
 
 def normalizar_texto(texto):
     if not isinstance(texto, str):
@@ -148,10 +140,10 @@ def processar_dataframe(df, arquivo, nome_planilha):
             df_final = df_final.iloc[1:]
 
         df_final['Saldo'] = df_final['Saldo'].apply(formatar_contabil)
-        df_final = df_final[df_final['Saldo'] != '']  
+        df_final = df_final[df_final['Saldo'] != '']
 
         df_final['Data_da_Ocorrencia'] = pd.to_datetime(df_final['Data_da_Ocorrencia'], errors='coerce')
-        df_final = df_final.dropna(subset=['Data_da_Ocorrencia']) 
+        df_final = df_final.dropna(subset=['Data_da_Ocorrencia'])
         df_final = df_final.sort_values(by='Data_da_Ocorrencia')
         df_final['Data_da_Ocorrencia'] = df_final['Data_da_Ocorrencia'].dt.strftime('%d/%m/%Y')
 
@@ -162,9 +154,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
         if nome_planilha == "CSV":
             df_final.to_csv(nome_saida, index=False, encoding='utf-8')
         else:
-            from openpyxl import Workbook
-            from openpyxl.utils.dataframe import dataframe_to_rows
-
             wb = Workbook()
             ws = wb.active
             ws.title = 'Dados Extraídos'
@@ -181,13 +170,9 @@ def processar_dataframe(df, arquivo, nome_planilha):
         print("Cabeçalhos não encontrados. Visualização das primeiras linhas:")
         print(df.head())
 
-def main():
-    arquivo = selecionar_arquivo()
-    if arquivo:
-        print(f"\nArquivo selecionado: {arquivo}")
-        extrair_dados(arquivo)
+def ITAU(path: str):
+    if os.path.isfile(path):
+        print(f"\nArquivo recebido: {path}")
+        extrair_dados(path)
     else:
-        print("Nenhum arquivo selecionado.")
-
-if __name__ == "__main__":
-    main()
+        print(f"Arquivo não encontrado: {path}")
