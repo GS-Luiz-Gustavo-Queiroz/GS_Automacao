@@ -3,6 +3,13 @@ from typing import List, Dict
 import pandas as pd
 import os
 
+def eh_data(data: str) -> bool:
+    """Verifica se uma string representa uma data no formato DD/MM/YYYY."""
+    if type(data) is not str:
+        return False
+    return (len(data) == 10) and ([data[2], data[5]] == ['/', '/']) \
+           and ((data[:2]+data[3:5]+data[6:]).isnumeric())
+
 
 def data_to_excel(data: List[List[str]], path: str) -> None:
     """

@@ -4,13 +4,8 @@ import sys
 import os
 # Adiciona a raiz do projeto ao path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from configs.utils import dict_to_df, get_text_from_pdf
+from configs.utils import dict_to_df, get_text_from_pdf, eh_data
 
-
-def eh_data(data: str) -> bool:
-    """Verifica se uma string representa uma data no formato DD/MM/YYYY."""
-    return (len(data) == 10) and ([data[2], data[5]] == ['/', '/']) \
-           and ((data[:2]+data[3:5]+data[6:]).isnumeric())
 
 
 def eh_registro(row: str) -> bool:
