@@ -1,16 +1,6 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog
 import unicodedata
 import os
-
-def selecionar_arquivo():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askopenfilename(
-        title="Selecione o arquivo",
-        filetypes=[("Arquivos TXT/Excel/CSV", "*.txt *.xlsx *.xls *.csv"), ("Todos os arquivos", "*.*")]
-    )
 
 def normalizar_texto(texto):
     if not isinstance(texto, str):
@@ -53,9 +43,9 @@ def encontrar_colunas(df):
     variacoes_data = ['data', 'data_mov', 'dataocorrencia', 'data_ocorrencia', 'data movimentacao', 'data_movimentacao']
     variacoes_valor = ['valor', 'valores', 'vlr', 'val', 'montante']
     variacoes_debcred = ['deb_cred', 'debito_credito', 'debcre', 'credito_debito', 'tipo']
-    
+
     col_data = col_valor = col_debcred = None
-    
+
     for col in df.columns:
         col_norm = normalizar_texto(str(col))
         if any(v in col_norm for v in variacoes_data) and col_data is None:
@@ -64,10 +54,10 @@ def encontrar_colunas(df):
             col_valor = col
         if any(v in col_norm for v in variacoes_debcred) and col_debcred is None:
             col_debcred = col
-    
+
     if col_data is None or col_valor is None or col_debcred is None:
         raise ValueError("Não foi possível encontrar as colunas 'Data_Mov', 'Valor' e 'Deb_Cred'")
-    
+
     return col_data, col_valor, col_debcred
 
 def processar_saldos_por_dia(df, col_data, col_valor, col_debcred):
@@ -90,7 +80,7 @@ def processar_saldos_por_dia(df, col_data, col_valor, col_debcred):
 
     # Agrupar por data e somar
     resultado = df.groupby(df[col_data].dt.strftime('%d/%m/%Y'))['Valor_Ajustado'].sum().reset_index()
-    resultado.columns = ['Data_da_Ocorrencia', 'Saldo']
+    resultado.columns = ['Data', 'Saldo']
 
     return resultado
 
@@ -99,18 +89,11 @@ def salvar_resultado(resultado, arquivo_origem):
     resultado.to_excel(nome_saida, index=False)
     print(f"\nArquivo com saldo diário salvo em:\n{os.path.abspath(nome_saida)}")
 
-def main():
-    arquivo = selecionar_arquivo()
-    if not arquivo:
-        print("Nenhum arquivo selecionado.")
-        return
+def CAIXA(path: str):
     try:
-        df = carregar_dados(arquivo)
+        df = carregar_dados(path)
         col_data, col_valor, col_debcred = encontrar_colunas(df)
         resultado = processar_saldos_por_dia(df, col_data, col_valor, col_debcred)
-        salvar_resultado(resultado, arquivo)
+        salvar_resultado(resultado, path)
     except Exception as e:
-        print(f"Erro: {e}")
-
-if __name__ == "__main__":
-    main()
+        print(f"Erro ao processar '{path}': {e}")

@@ -1,18 +1,8 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog
 import unicodedata
 import os
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
-
-def selecionar_arquivo():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askopenfilename(
-        title="Selecione o arquivo",
-        filetypes=[("Arquivos Excel/CSV", "*.xlsx *.xls *.csv"), ("Todos os arquivos", "*.*")]
-    )
 
 def normalizar_texto(texto):
     if not isinstance(texto, str):
@@ -48,16 +38,16 @@ def converter_xls_para_xlsx(arquivo):
     print(f"Arquivo convertido salvo como: {novo_arquivo}")
     return novo_arquivo
 
-def extrair_dados(arquivo):
+def extrair_dados(path):
     try:
-        if arquivo.lower().endswith('.xls'):
-            arquivo = converter_xls_para_xlsx(arquivo)
+        if path.lower().endswith('.xls'):
+            path = converter_xls_para_xlsx(path)
 
-        if arquivo.lower().endswith('.xlsx'):
-            xls = pd.ExcelFile(arquivo)
-            processar_excel(xls, arquivo)
-        elif arquivo.lower().endswith('.csv'):
-            processar_csv(arquivo)
+        if path.lower().endswith('.xlsx'):
+            xls = pd.ExcelFile(path)
+            processar_excel(xls, path)
+        elif path.lower().endswith('.csv'):
+            processar_csv(path)
         else:
             print("Formato de arquivo não suportado.")
     except Exception as e:
@@ -130,7 +120,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
         return
 
     df_final = df_final[[col_data, col_saldo]]
-
     df_final.columns = ['Data', 'Saldo']
 
     if linha_cabecalho == 0:
@@ -139,9 +128,7 @@ def processar_dataframe(df, arquivo, nome_planilha):
     df_final['Saldo'] = df_final['Saldo'].apply(formatar_contabil)
     df_final = df_final[df_final['Saldo'] != '']
 
-    df_final['Data'] = pd.to_datetime(
-        df_final['Data'], errors='coerce', dayfirst=True
-    )
+    df_final['Data'] = pd.to_datetime(df_final['Data'], errors='coerce', dayfirst=True)
     df_final = df_final.dropna(subset=['Data'])
     df_final = df_final.sort_values(by='Data')
 
@@ -155,7 +142,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
     print(df_final.head())
 
     nome_saida = criar_nome_arquivo_saida(arquivo, nome_planilha)
-    
 
     wb = Workbook()
     ws = wb.active
@@ -169,14 +155,9 @@ def processar_dataframe(df, arquivo, nome_planilha):
     wb.save(nome_saida)
     print(f"\nNovo arquivo criado: {nome_saida}")
 
-
-def main():
-    arquivo = selecionar_arquivo()
-    if arquivo:
-        print(f"\nArquivo selecionado: {arquivo}")
-        extrair_dados(arquivo)
+def SANTANDER(path: str):
+    if os.path.isfile(path):
+        print(f"\nArquivo recebido: {path}")
+        extrair_dados(path)
     else:
-        print("Nenhum arquivo selecionado.")
-
-if __name__ == "__main__":
-    main()
+        print(f"Arquivo não encontrado: {path}")

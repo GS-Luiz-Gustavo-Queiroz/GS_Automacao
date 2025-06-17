@@ -1,19 +1,9 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog
 import unicodedata
 import os
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font
-
-def selecionar_arquivo():
-    root = tk.Tk()
-    root.withdraw()
-    return filedialog.askopenfilename(
-        title="Selecione o arquivo",
-        filetypes=[("Arquivos Excel/CSV", "*.xlsx *.xls *.csv"), ("Todos os arquivos", "*.*")]
-    )
 
 def normalizar_texto(texto):
     if not isinstance(texto, str):
@@ -47,18 +37,18 @@ def converter_valor(valor):
     except (ValueError, TypeError):
         return 0.0
 
-def extrair_dados(arquivo):
+def extrair_dados(path):
     try:
-        if arquivo.lower().endswith(('.xlsx', '.xls')):
-            xls = pd.ExcelFile(arquivo)
+        if path.lower().endswith(('.xlsx', '.xls')):
+            xls = pd.ExcelFile(path)
             for sheet_name in xls.sheet_names:
                 print(f"\nProcessando planilha: {sheet_name}")
-                df = pd.read_excel(arquivo, sheet_name=sheet_name, header=None)
-                processar_dataframe(df, arquivo, sheet_name)
-        elif arquivo.lower().endswith('.csv'):
+                df = pd.read_excel(path, sheet_name=sheet_name, header=None)
+                processar_dataframe(df, path, sheet_name)
+        elif path.lower().endswith('.csv'):
             print("\nProcessando arquivo CSV")
-            df = pd.read_csv(arquivo, header=None, encoding='utf-8')
-            processar_dataframe(df, arquivo, "CSV")
+            df = pd.read_csv(path, header=None, encoding='utf-8')
+            processar_dataframe(df, path, "CSV")
         else:
             print("Formato de arquivo não suportado.")
     except Exception as e:
@@ -92,7 +82,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
     df['Saldo'] = df['Saldo'].apply(converter_valor)
     df = df.dropna(subset=['Data'])
 
-    # Mantém a última linha de cada data
     df_filtrado = df.sort_values('Data').groupby(df['Data'].dt.date, as_index=False).last()
     df_filtrado['Data'] = pd.to_datetime(df_filtrado['Data']).dt.strftime('%d/%m/%Y')
     df_filtrado['Saldo'] = df_filtrado['Saldo'].apply(formatar_contabil)
@@ -113,12 +102,9 @@ def processar_dataframe(df, arquivo, nome_planilha):
     wb.save(nome_saida)
     print(f"Arquivo salvo com sucesso: {nome_saida}")
 
-def main():
-    arquivo = selecionar_arquivo()
-    if arquivo:
-        extrair_dados(arquivo)
+def BANESTES_RPL(path: str):
+    if os.path.isfile(path):
+        print(f"\nArquivo recebido: {path}")
+        extrair_dados(path)
     else:
-        print("Nenhum arquivo selecionado.")
-
-if __name__ == "__main__":
-    main()
+        print(f"Arquivo não encontrado: {path}")
