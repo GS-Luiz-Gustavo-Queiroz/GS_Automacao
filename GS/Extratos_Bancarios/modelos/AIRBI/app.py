@@ -5,30 +5,6 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import Font
 
-def converter_xls_para_xlsx(caminho_arquivo):
-    import xlrd
-    from openpyxl import Workbook
-
-    if not caminho_arquivo.lower().endswith('.xls'):
-        return caminho_arquivo
-
-    print("Convertendo .xls para .xlsx...")
-    wb_xls = xlrd.open_workbook(caminho_arquivo)
-    pasta = os.path.dirname(caminho_arquivo)
-    nome = os.path.splitext(os.path.basename(caminho_arquivo))[0]
-    novo_arquivo = os.path.join(pasta, nome + '.xlsx')
-
-    wb_xlsx = Workbook()
-    ws_xlsx = wb_xlsx.active
-    sheet = wb_xls.sheet_by_index(0)
-
-    for row in range(sheet.nrows):
-        ws_xlsx.append(sheet.row_values(row))
-
-    wb_xlsx.save(novo_arquivo)
-    print(f"Arquivo convertido para: {novo_arquivo}")
-    return novo_arquivo
-
 def normalizar_texto(texto):
     if not isinstance(texto, str):
         return ""
@@ -36,7 +12,7 @@ def normalizar_texto(texto):
     return ''.join(c for c in texto if c.isalnum() or c.isspace()).strip().lower()
 
 def criar_nome_arquivo_saida(arquivo_original, nome_planilha):
-    base, ext = os.path.splitext(arquivo_original)
+    base, _ = os.path.splitext(arquivo_original)
     contador = 1
     while True:
         novo_nome = f"{base}_extraido_{nome_planilha}_{contador}.xlsx"
@@ -54,43 +30,17 @@ def formatar_contabil(valor):
         return str(valor)
 
 def extrair_dados(path):
-    if path.lower().endswith('.xls'):
-        path = converter_xls_para_xlsx(path)
-
     try:
-        if path.lower().endswith(('.xlsx', '.xls')):
-            xls = pd.ExcelFile(path)
-            processar_excel(xls, path)
-        elif path.lower().endswith('.csv'):
-            processar_csv(path)
-        else:
-            print("Formato de arquivo não suportado.")
+        xls = pd.ExcelFile(path)
+        for sheet_name in xls.sheet_names:
+            print(f"\nProcessando planilha: {sheet_name}")
+            try:
+                df = pd.read_excel(path, sheet_name=sheet_name, header=None)
+                processar_dataframe(df, path, sheet_name)
+            except Exception as e:
+                print(f"Erro ao processar planilha {sheet_name}: {e}")
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
-
-def processar_excel(xls, arquivo):
-    for sheet_name in xls.sheet_names:
-        print(f"\nProcessando planilha: {sheet_name}")
-        try:
-            df = pd.read_excel(arquivo, sheet_name=sheet_name, header=None)
-            processar_dataframe(df, arquivo, sheet_name)
-        except Exception as e:
-            print(f"Erro ao processar planilha {sheet_name}: {e}")
-
-def processar_csv(arquivo):
-    print("\nProcessando arquivo CSV")
-    encodings = ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']
-    separadores = [',', ';', '\t']
-    for encoding in encodings:
-        for sep in separadores:
-            try:
-                df = pd.read_csv(arquivo, header=None, encoding=encoding, sep=sep)
-                print(f"Arquivo lido com encoding {encoding} e separador '{sep}'")
-                processar_dataframe(df, arquivo, "CSV")
-                return
-            except:
-                continue
-    print("Não foi possível ler o arquivo CSV")
 
 def processar_dataframe(df, arquivo, nome_planilha):
     variacoes_cabecalhos = {
@@ -154,8 +104,8 @@ def processar_dataframe(df, arquivo, nome_planilha):
         print(df.head())
 
 def AIRBI(path: str):
-    if os.path.isfile(path):
+    if os.path.isfile(path) and path.lower().endswith('.xlsx'):
         print(f"\nArquivo recebido: {path}")
         extrair_dados(path)
     else:
-        print(f"Arquivo não encontrado: {path}")
+        print(f"Arquivo inválido ou não encontrado: {path}")

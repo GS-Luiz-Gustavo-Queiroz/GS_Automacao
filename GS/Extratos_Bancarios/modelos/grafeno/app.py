@@ -11,10 +11,10 @@ def normalizar_texto(texto):
     return ''.join(c for c in texto if c.isalnum() or c.isspace()).strip().lower()
 
 def criar_nome_arquivo_saida(arquivo_original, nome_planilha):
-    base, ext = os.path.splitext(arquivo_original)
+    base, _ = os.path.splitext(arquivo_original)
     contador = 1
     while True:
-        novo_nome = f"{base}_extraido_{nome_planilha}_{contador}{ext}"
+        novo_nome = f"{base}_extraido_{nome_planilha}_{contador}.xlsx"
         if not os.path.exists(novo_nome):
             return novo_nome
         contador += 1
@@ -30,13 +30,11 @@ def formatar_contabil(valor):
 
 def extrair_dados(path):
     try:
-        if path.lower().endswith(('.xlsx', '.xls')):
+        if path.lower().endswith('.xlsx'):
             xls = pd.ExcelFile(path)
             processar_excel(xls, path)
-        elif path.lower().endswith('.csv'):
-            processar_csv(path)
         else:
-            print("Formato de arquivo não suportado.")
+            print("Apenas arquivos .xlsx são suportados.")
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
 
@@ -48,21 +46,6 @@ def processar_excel(xls, arquivo):
             processar_dataframe(df, arquivo, sheet_name)
         except Exception as e:
             print(f"Erro ao processar planilha {sheet_name}: {e}")
-
-def processar_csv(arquivo):
-    print("\nProcessando arquivo CSV")
-    encodings = ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']
-    separadores = [',', ';', '\t']
-    for encoding in encodings:
-        for sep in separadores:
-            try:
-                df = pd.read_csv(arquivo, header=None, encoding=encoding, sep=sep)
-                print(f"Arquivo lido com encoding {encoding} e separador '{sep}'")
-                processar_dataframe(df, arquivo, "CSV")
-                return
-            except:
-                continue
-    print("Não foi possível ler o arquivo CSV")
 
 def processar_dataframe(df, arquivo, nome_planilha):
     variacoes_cabecalhos = {
@@ -89,11 +72,7 @@ def processar_dataframe(df, arquivo, nome_planilha):
     if linha_cabecalho is not None:
         print(f"Encontrados cabeçalhos na linha {linha_cabecalho + 1}")
 
-        if nome_planilha == "CSV":
-            df_final = pd.read_csv(arquivo, header=linha_cabecalho)
-        else:
-            df_final = pd.read_excel(arquivo, sheet_name=nome_planilha, header=linha_cabecalho)
-
+        df_final = pd.read_excel(arquivo, sheet_name=nome_planilha, header=linha_cabecalho)
         df_final = df_final.dropna(how='all')
 
         colunas_map = {col: normalizar_texto(col) for col in df_final.columns}
@@ -108,42 +87,35 @@ def processar_dataframe(df, arquivo, nome_planilha):
 
         df_final = df_final[[col_data, col_saldo]]
         df_final.columns = ['Data', ' Saldo']
-
         df_final = df_final.iloc[1:-1]
 
         df_final[' Saldo'] = df_final[' Saldo'].apply(formatar_contabil)
-
         df_final['Data'] = pd.to_datetime(df_final['Data'], errors='coerce')
         df_final = df_final.sort_values(by='Data')
-
         df_final['Data'] = df_final['Data'].dt.strftime('%d/%m/%Y')
 
         print("\nDados extraídos e formatados")
         print(df_final.head())
 
         nome_saida = criar_nome_arquivo_saida(arquivo, nome_planilha)
-        if nome_planilha == "CSV":
-            df_final.to_csv(nome_saida, index=False, encoding='utf-8')
-        else:
-            wb = Workbook()
-            ws = wb.active
-            ws.title = 'Dados Extraídos'
+        wb = Workbook()
+        ws = wb.active
+        ws.title = 'Dados Extraídos'
 
-            for r_idx, row in enumerate(dataframe_to_rows(df_final, index=False, header=True), 1):
-                ws.append(row)
-                if r_idx > 1:
-                    ws[f'B{r_idx}'].number_format = '#.##0,00_-'
+        for r_idx, row in enumerate(dataframe_to_rows(df_final, index=False, header=True), 1):
+            ws.append(row)
+            if r_idx > 1:
+                ws[f'B{r_idx}'].number_format = '#.##0,00_-'
 
-            wb.save(nome_saida)
-
+        wb.save(nome_saida)
         print(f"\nNovo arquivo criado: {nome_saida}")
     else:
         print("Cabeçalhos não encontrados nas primeiras linhas:")
         print(df.head())
 
 def GRAFENO(path: str):
-    if os.path.isfile(path):
+    if os.path.isfile(path) and path.lower().endswith('.xlsx'):
         print(f"\nArquivo recebido: {path}")
         extrair_dados(path)
     else:
-        print(f"Arquivo não encontrado: {path}")
+        print("Arquivo inválido ou não encontrado. Apenas arquivos .xlsx são aceitos.")
