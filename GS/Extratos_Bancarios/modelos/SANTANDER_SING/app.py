@@ -39,45 +39,27 @@ def converter_xls_para_xlsx(arquivo):
     return novo_arquivo
 
 def extrair_dados(path):
-    try:
-        if path.lower().endswith('.xls'):
-            path = converter_xls_para_xlsx(path)
+    if not path.lower().endswith('.xls'):
+        print("Formato inválido. Apenas arquivos .xls são suportados.")
+        return
 
-        if path.lower().endswith('.xlsx'):
-            xls = pd.ExcelFile(path)
-            processar_excel(xls, path)
-        elif path.lower().endswith('.csv'):
-            processar_csv(path)
-        else:
-            print("Formato de arquivo não suportado.")
+    try:
+        path_convertido = converter_xls_para_xlsx(path)
+        xls = pd.ExcelFile(path_convertido)
+        processar_excel(xls, path_convertido, path)
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
 
-def processar_excel(xls, arquivo):
+def processar_excel(xls, arquivo_convertido, arquivo_original):
     for sheet_name in xls.sheet_names:
         print(f"\nProcessando planilha: {sheet_name}")
         try:
-            df = pd.read_excel(arquivo, sheet_name=sheet_name, header=None)
-            processar_dataframe(df, arquivo, sheet_name)
+            df = pd.read_excel(arquivo_convertido, sheet_name=sheet_name, header=None)
+            processar_dataframe(df, arquivo_original, sheet_name, arquivo_convertido)
         except Exception as e:
             print(f"Erro ao processar planilha {sheet_name}: {e}")
 
-def processar_csv(arquivo):
-    print("\nProcessando arquivo CSV")
-    encodings = ['utf-8', 'latin1', 'iso-8859-1', 'cp1252']
-    separadores = [',', ';', '\t']
-    for encoding in encodings:
-        for sep in separadores:
-            try:
-                df = pd.read_csv(arquivo, header=None, encoding=encoding, sep=sep)
-                print(f"Arquivo lido com encoding {encoding} e separador '{sep}'")
-                processar_dataframe(df, arquivo, "CSV")
-                return
-            except:
-                continue
-    print("Não foi possível ler o arquivo CSV")
-
-def processar_dataframe(df, arquivo, nome_planilha):
+def processar_dataframe(df, arquivo_original, nome_planilha, arquivo_convertido):
     variacoes_cabecalhos = {
         'data': ['data', 'dataocorrencia', 'data_ocorrencia', 'Data_da_Ocorrencia', 'dataocorrência', 'data ocorrência'],
         'saldo': ['saldo', 'saldos', 'sld']
@@ -102,11 +84,7 @@ def processar_dataframe(df, arquivo, nome_planilha):
         print(df.head())
         return
 
-    if nome_planilha == "CSV":
-        df_final = pd.read_csv(arquivo, header=linha_cabecalho)
-    else:
-        df_final = pd.read_excel(arquivo, sheet_name=nome_planilha, header=linha_cabecalho)
-
+    df_final = pd.read_excel(arquivo_convertido, sheet_name=nome_planilha, header=linha_cabecalho)
     df_final = df_final.dropna(how='all')
 
     colunas_map = {col: normalizar_texto(col) for col in df_final.columns}
@@ -141,7 +119,7 @@ def processar_dataframe(df, arquivo, nome_planilha):
     print("\nDados extraídos e filtrados (última data de cada dia):")
     print(df_final.head())
 
-    nome_saida = criar_nome_arquivo_saida(arquivo, nome_planilha)
+    nome_saida = criar_nome_arquivo_saida(arquivo_original, nome_planilha)
 
     wb = Workbook()
     ws = wb.active
@@ -156,8 +134,8 @@ def processar_dataframe(df, arquivo, nome_planilha):
     print(f"\nNovo arquivo criado: {nome_saida}")
 
 def SANTANDER_SING(path: str):
-    if os.path.isfile(path):
+    if os.path.isfile(path) and path.lower().endswith('.xls'):
         print(f"\nArquivo recebido: {path}")
         extrair_dados(path)
     else:
-        print(f"Arquivo não encontrado: {path}")
+        print("Arquivo inválido ou não encontrado. Apenas arquivos .xls são permitidos.")

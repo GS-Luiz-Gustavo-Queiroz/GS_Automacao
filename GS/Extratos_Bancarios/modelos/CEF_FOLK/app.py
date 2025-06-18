@@ -5,12 +5,10 @@ def extrair_e_salvar_colunas(caminho_arquivo):
     extensao = os.path.splitext(caminho_arquivo)[1].lower()
 
     try:
-        if extensao == '.csv':
-            df = pd.read_csv(caminho_arquivo, header=1)
-        elif extensao in ['.xls', '.xlsx']:
+        if extensao == '.xls':
             df = pd.read_excel(caminho_arquivo, header=1)
         else:
-            print("Formato de arquivo não suportado.")
+            print("Apenas arquivos .xls são suportados.")
             return
 
         if 'Data Lançamento' not in df.columns or 'Saldo' not in df.columns:
@@ -46,8 +44,8 @@ def extrair_e_salvar_colunas(caminho_arquivo):
         print("Erro ao processar o arquivo:", e)
 
 def CEF_FOLK(path: str):
-    if os.path.isfile(path):
+    if os.path.isfile(path) and path.lower().endswith('.xls'):
         print(f"\nArquivo recebido: {path}")
         extrair_e_salvar_colunas(path)
     else:
-        print("Arquivo não encontrado:", path)
+        print("Arquivo inválido ou não encontrado (somente arquivos .xls são permitidos).")
