@@ -31,7 +31,7 @@ def formatar_contabil(valor):
 def converter_xls_para_xlsx(arquivo):
     print(f"Convertendo arquivo .xls para .xlsx: {arquivo}")
     df_dict = pd.read_excel(arquivo, sheet_name=None, engine='xlrd')
-    novo_arquivo = arquivo.replace('.xls', '_convertido.xlsx')
+    novo_arquivo = arquivo.replace('.xls', '_conve rtido.xlsx')
     with pd.ExcelWriter(novo_arquivo, engine='openpyxl') as writer:
         for nome, df in df_dict.items():
             df.to_excel(writer, sheet_name=nome, index=False)

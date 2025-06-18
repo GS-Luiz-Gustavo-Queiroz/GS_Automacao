@@ -15,5 +15,5 @@ from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
 
 
 
-path = 'modelos/BANESTES_RPL/BANESTES RPL.xlsx'
-BANESTES_RPL(path)
+df = AIRBI('modelos/AIRBI/AIRBI SOLUCAOextrato_0003740223_de_02-06-2025_ate_09-06-2025.xlsx')
+df.to_excel('planilha_teste.xlsx', index=False)
