@@ -1,6 +1,6 @@
 # from modelos.SPX_VISON.main import spx_vision
 # from modelos.CAIXA.app import CAIXA
-from modelos.AIRBI.app import AIRBI
+# from modelos.AIRBI.app import AIRBI
 # from modelos.BANESTES_RPL.app import BANESTES_RPL
 # from modelos.GRAFENO.app import GRAFENO
 # from modelos.GRAFENO_HITEC.app import GRAFENO_HITEC
@@ -11,7 +11,7 @@ from modelos.AIRBI.app import AIRBI
 # from modelos.SANTANDER_SING.app import SANTANDER_SING
 # from modelos.CEF_FOLK.app import CEF_FOLK
 # from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
-
+from modelos.SICOOB_JS_ADM.app import sicoob_js_adm
 
 # path = 'modelos/SPX_VISON/SPX VISON.pdf'
 # spx_vision(path)
@@ -53,5 +53,9 @@ from modelos.AIRBI.app import AIRBI
 # path = 'modelos/CORA_GS_FACILITIES/CORA gs-facilites-for_01052025_a_31052025_f8711ab6 (1).pdf'
 # CORA_GS_FACILITIES(path)
 
-df = AIRBI('modelos/AIRBI/AIRBI SOLUCAOextrato_0003740223_de_02-06-2025_ate_09-06-2025.xlsx')
-df.to_excel('planilha_teste.xlsx', index=False)
+# df = AIRBI('modelos/AIRBI/AIRBI SOLUCAOextrato_0003740223_de_02-06-2025_ate_09-06-2025.xlsx')
+# df.to_excel('planilha_teste.xlsx', index=False)
+
+
+df  = sicoob_js_adm('modelos/SICOOB_JS_ADM/SICOOB - JS ADM  EXTRATO BANCARIO -.pdf')
+df.to_excel('SICOOB_FORMATADO.xlsx', index=False)
