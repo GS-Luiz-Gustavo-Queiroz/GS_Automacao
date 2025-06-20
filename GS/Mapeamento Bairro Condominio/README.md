@@ -1,8 +1,8 @@
 #### Ordem de execução dos scripts:
 
-1 - No arquivo [(download_dados_receita)](./scraping_download_dados_receita/download_dados_receita.ipynb), execute a função 'download_dados_estabelecimentos_empresas()'.</br>
-2 - No arquivo [(filtragem_condominios_fortaleza)](./tratamento_arquivos_receita/filtragem_condominios_fortaleza.ipynb), execute a função 'filtrar_cond_fortaleza()'.</br>
-3 - No arquivo [(cruzamento_cond_fortaleza_razao_social)](./tratamento_arquivos_receita/cruzamento_cond_fortaleza_razao_social.ipynb), execute a função 'cruzar_dados_cond_fort_razao_social()'.</br>
+1 - Execute o arquivo [download_dados_receita](./scraping_download_dados_receita/download_dados_receita.ipynb) (a função que executa é 'download_dados_estabelecimentos_empresas()').</br>
+2 - Execute o arquivo [(filtragem_condominios_fortaleza)](./tratamento_arquivos_receita/filtragem_condominios_fortaleza.ipynb) (a função que executa é' filtrar_cond_fortaleza()').</br>
+3 - Execute o arquivo [(cruzamento_cond_fortaleza_razao_social)](./tratamento_arquivos_receita/cruzamento_cond_fortaleza_razao_social.ipynb) (a função que executa é 'cruzar_dados_cond_fort_razao_social()').</br>
 
 A lógica é a seguinte:</br>
 1 - Na execução de **_download dos dados_**, os arquivos das empresas e estebelecimentos serão baixados, descompactados, nomeados e organizados em suas respectivas pastas (pasta essa que é irmã da pasta da execução do código).</br>
