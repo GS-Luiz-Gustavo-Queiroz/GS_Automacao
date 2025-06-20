@@ -1,9 +1,11 @@
 from modelos.BB_CONDO_PREST.app import bb_condoprest
 from modelos.BRADESCO_HISYSTEM.app import bradesco_hisystem
 from modelos.INTER_SING.app import inter_sing
+from modelos.SICOOB_JS_ADM.app import sicoob_js_adm
 import pandas as pd
 
 #df = bb_condoprest('modelos/BB_CONDO_PREST/BB - CONDO PREST - 00.pdf')
 # df = bradesco_hisystem('modelos/BRADESCO_HISYSTEM/Bradesco_HISYSTEM 09062025_101125.CSV')
-df = inter_sing('modelos/INTER_SING/INTER SING 08 Extrato-11-05-2025-a-09-06-2025.csv')
-df.to_excel('planilha_formatada.xlsx', index=False)
+# df = inter_sing('modelos/INTER_SING/INTER SING 08 Extrato-11-05-2025-a-09-06-2025.csv')
+df = sicoob_js_adm('modelos/SICOOB_JS_ADM/SICOOB - JS ADM  EXTRATO BANCARIO -.pdf')
+# df.to_excel('planilha_formatada.xlsx', index=False)
