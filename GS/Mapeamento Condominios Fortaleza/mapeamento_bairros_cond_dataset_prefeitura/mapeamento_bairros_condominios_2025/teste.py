@@ -1,0 +1,3 @@
+import captura_dados_faltantes
+
+captura_dados_faltantes.captura_dados_faltantes_api("condominios_total_parte1.csv")
