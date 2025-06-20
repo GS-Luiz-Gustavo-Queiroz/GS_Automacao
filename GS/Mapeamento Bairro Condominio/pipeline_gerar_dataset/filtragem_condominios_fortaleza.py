@@ -32,7 +32,7 @@ def tratamento_data_sit_cadast(dataset):
     data_sit_cadast_novo = data_sit_cadast.str[6:8] +"/"+ data_sit_cadast.str[4:6] +"/"+ data_sit_cadast.str[:4]
     dataset["data_sit_cadast"] = data_sit_cadast_novo
 
-    dataset.to_csv("condominios_total.csv", index=False, encoding='latin1')
+    # dataset.to_csv("condominios_total.csv", index=False, encoding='latin1')
 
     return dataset
 
@@ -42,7 +42,7 @@ def tratamento_data_inicio(dataset):
     data_inicio_novo = data_inicio.str[6:8] +"/"+ data_inicio.str[4:6] +"/"+ data_inicio.str[:4]
     dataset["data_inicio"] = data_inicio_novo
 
-    dataset.to_csv("condominios_total.csv", index=False, encoding='latin1')
+    # dataset.to_csv("condominios_total.csv", index=False, encoding='latin1')
 
     return dataset
 
@@ -103,4 +103,4 @@ def filtrar_cond_fortaleza():
 """
 
 # %%
-filtrar_cond_fortaleza()
+# filtrar_cond_fortaleza()

@@ -160,4 +160,4 @@ def download_dados_estabelecimentos_empresas():
     download_estabelecimentos()
 
 # %%
-download_dados_estabelecimentos_empresas()
+# download_dados_estabelecimentos_empresas()
