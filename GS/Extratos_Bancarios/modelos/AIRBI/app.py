@@ -62,20 +62,7 @@ def extrair_saldo_por_dia(df: pd.DataFrame) -> Optional[pd.DataFrame]:
     df_filtrado['Saldo'] = df_filtrado['Saldo'].apply(formatar_contabil)
     return df_filtrado
 
-def salvar_em_excel(df: pd.DataFrame, caminho: str, nome_aba: str) -> None:
-    wb = Workbook()
-    ws = wb.active
-    ws.title = nome_aba
 
-    for r in dataframe_to_rows(df, index=False, header=True):
-        ws.append(r)
-
-    for row in ws.iter_rows(min_row=2, min_col=2, max_col=2):
-        for cell in row:
-            cell.number_format = '#.##0,00_-'
-            cell.font = Font(bold=True)
-
-    wb.save(caminho)
 
 def AIRBI(path: str) -> Optional[pd.DataFrame]:
     if not (os.path.isfile(path) and path.lower().endswith('.xlsx')):
@@ -88,13 +75,10 @@ def AIRBI(path: str) -> Optional[pd.DataFrame]:
         df_raw = pd.read_excel(path, sheet_name=nome_aba, header=None)
         df_processado = extrair_saldo_por_dia(df_raw)
         if df_processado is not None:
-            caminho_saida = f"saida_{normalizar_texto(nome_aba)}.xlsx"
-            salvar_em_excel(df_processado, caminho_saida, 'Saldo por Dia')
+            return df_processado
             
-            df_processado['Origem'] = nome_aba
-            dataframes_processados.append(df_processado)
 
     if not dataframes_processados:
-        return None
+        raise Exception(f'{path} gerou erro na leitura.')
 
     return pd.concat(dataframes_processados, ignore_index=True)
