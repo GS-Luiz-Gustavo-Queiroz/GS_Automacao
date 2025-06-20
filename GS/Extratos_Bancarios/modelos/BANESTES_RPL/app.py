@@ -11,11 +11,11 @@ def normalizar_texto(texto):
     texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('ASCII')
     return ''.join(c for c in texto if c.isalnum() or c.isspace()).strip().lower()
 
-def criar_nome_arquivo_saida(arquivo_original, nome_planilha):
+def criar_nome_arquivo_saida(arquivo_original):
     base, _ = os.path.splitext(arquivo_original)
     contador = 1
     while True:
-        novo_nome = f"{base}_formatado_{nome_planilha}_{contador}.xlsx"
+        novo_nome = f"BANESTES_RPL_FORMATADO {contador}.xlsx"
         if not os.path.exists(novo_nome):
             return novo_nome
         contador += 1
@@ -37,33 +37,6 @@ def converter_valor(valor):
     except (ValueError, TypeError):
         return 0.0
 
-def extrair_dados(path):
-    try:
-        wb = load_workbook(path, data_only=True)
-        for sheet_name in wb.sheetnames:
-            print(f"\nProcessando planilha: {sheet_name}")
-            ws = wb[sheet_name]
-
-            dados = []
-            for row in ws.iter_rows(values_only=False):
-                if all(cell.value is None for cell in row):
-                    continue
-
-                # Verifica se a primeira célula está em negrito
-                if row[0].font and row[0].font.bold:
-                    valores = [cell.value for cell in row]
-                    dados.append(valores)
-
-            if not dados:
-                print("Nenhuma linha em negrito encontrada.")
-                continue
-
-            df = pd.DataFrame(dados)
-            processar_dataframe(df, path, sheet_name)
-
-    except Exception as e:
-        print(f"Erro ao processar o arquivo: {e}")
-
 def processar_dataframe(df, arquivo, nome_planilha):
     linha_cabecalho = None
     for idx, linha in df.iterrows():
@@ -74,7 +47,7 @@ def processar_dataframe(df, arquivo, nome_planilha):
 
     if linha_cabecalho is None:
         print("Cabeçalhos de data/valor não encontrados.")
-        return
+        return None
 
     df.columns = df.iloc[linha_cabecalho]
     df = df.drop(index=range(0, linha_cabecalho + 1))
@@ -85,14 +58,13 @@ def processar_dataframe(df, arquivo, nome_planilha):
 
     if not col_data or not col_valor:
         print("Colunas de Data ou Valor não encontradas.")
-        return
+        return None
 
     df = df[[col_data, col_valor]].rename(columns={col_data: 'Data', col_valor: 'Saldo'})
     df['Data'] = pd.to_datetime(df['Data'], dayfirst=True, errors='coerce')
     df['Saldo'] = df['Saldo'].apply(converter_valor)
     df = df.dropna(subset=['Data'])
 
-    # Ordena por data e extrai a última ocorrência de cada dia
     df = df.sort_values('Data')
     df['Data_Dia'] = df['Data'].dt.date
     df_filtrado = df.groupby('Data_Dia', as_index=False).last()
@@ -100,7 +72,6 @@ def processar_dataframe(df, arquivo, nome_planilha):
     df_filtrado = df_filtrado.drop(columns=['Data_Dia'])
     df_filtrado['Saldo'] = df_filtrado['Saldo'].apply(formatar_contabil)
 
-    # Criar e salvar planilha formatada
     nome_saida = criar_nome_arquivo_saida(arquivo, nome_planilha)
     wb = Workbook()
     ws = wb.active
@@ -117,9 +88,45 @@ def processar_dataframe(df, arquivo, nome_planilha):
     wb.save(nome_saida)
     print(f"Arquivo salvo com sucesso: {nome_saida}")
 
+    return df_filtrado  
+
+def extrair_dados(path):
+    try:
+        wb = load_workbook(path, data_only=True)
+        dataframes = []
+
+        for sheet_name in wb.sheetnames:
+            print(f"\nProcessando planilha: {sheet_name}")
+            ws = wb[sheet_name]
+
+            dados = []
+            for row in ws.iter_rows(values_only=False):
+                if all(cell.value is None for cell in row):
+                    continue
+
+                if row[0].font and row[0].font.bold:
+                    valores = [cell.value for cell in row]
+                    dados.append(valores)
+
+            if not dados:
+                print("Nenhuma linha em negrito encontrada.")
+                continue
+
+            df = pd.DataFrame(dados)
+            df_formatado = processar_dataframe(df, path, sheet_name)
+            if df_formatado is not None:
+                dataframes.append(df_formatado)
+
+        if dataframes:
+            return pd.concat(dataframes, ignore_index=True)
+
+    except Exception as e:
+        print(f"Erro ao processar o arquivo: {e}")
+    
+    return None  
+
 def BANESTES_RPL(path: str):
-    if os.path.isfile(path) and path.lower().endswith('.xlsx'):
-        print(f"\nArquivo recebido: {path}")
-        extrair_dados(path)
-    else:
-        print(f"Arquivo inválido ou não encontrado (apenas .xlsx são aceitos): {path}")
+    if not (os.path.isfile(path) and path.lower().endswith('.xlsx')):
+        return None
+    return extrair_dados(path)
+ 
