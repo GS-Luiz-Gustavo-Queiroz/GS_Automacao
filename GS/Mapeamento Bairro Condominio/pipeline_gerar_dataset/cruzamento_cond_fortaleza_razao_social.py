@@ -71,4 +71,4 @@ def cruzar_dados_cond_fort_razao_social():
     return cond_fortaleza_com_razao_social
 
 # %%
-cruzar_dados_cond_fort_razao_social()
+# cruzar_dados_cond_fort_razao_social()

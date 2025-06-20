@@ -10,3 +10,6 @@ A lógica é a seguinte:</br>
 1 - Na execução de **_download dos dados_**, os arquivos das empresas e estebelecimentos serão baixados, descompactados, nomeados e organizados em suas respectivas pastas (pasta essa que é irmã da pasta da execução do código).</br>
 2 - Na execução de **_filtragem de condomínios de fortaleza_** os dados de estabelecimentos serão filtrados pelo CNAE de condomínios prediais e pelo código da cidade de fortaleza, e então o dataset dos condomínios de fortaleza será gerado.</br>
 3 - Na execução da função de **_cruzamento de dados_**, nosso dataset dos condomínios de fortaleza terá seus dados cruzados com os dados das empresas para atribução da razão social.</br>
+
+
+##### OBS.: Pela quantidade de dados baixados serem massivas, em uma rede de 100Mbps tomou 2 horas para finalizar a execução (download + tratamento + filtro + geração do dataset).
