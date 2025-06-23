@@ -21,7 +21,7 @@ def download_new_version(file_name: str, url: str):
 
 if __name__ == '__main__':
     try:
-        download_new_version('../main.exe', 'https://raw.githubusercontent.com/LuizGusQueiroz/Automacoes/main/GS/Operacoes%20em%20PDF/_Manipulador%20de%20PDF/main.exe')
+        download_new_version('../main.exe', 'https://raw.githubusercontent.com/GS-Luiz-Gustavo-Queiroz/GS_Automacao/main/GS/Operacoes%20em%20PDF/_Manipulador%20de%20PDF/main.exe')
     except Exception as e:
         print(e)
         input()

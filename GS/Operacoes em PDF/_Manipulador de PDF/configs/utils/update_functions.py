@@ -12,7 +12,7 @@ def check_update(VERSION: str):
 
 def get_last_version():
     # Endpoint da API para buscar o histórico de commits de um arquivo específico.
-    url = f"https://api.github.com/repos/LuizGusQueiroz/Automacoes/commits"
+    url = "https://api.github.com/repos/GS-Luiz-Gustavo-Queiroz/GS_Automacao/commits"
     # Parâmetros da consulta, para buscar commits de um arquivo específico
     params = {'path': "GS/Operacoes em PDF/_Manipulador de PDF/main.exe"}
     try:
