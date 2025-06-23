@@ -1,0 +1,3 @@
+from gerar_dataset_cond_fortaleza import gerar_dataset
+
+gerar_dataset()
