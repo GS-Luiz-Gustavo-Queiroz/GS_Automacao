@@ -1,6 +1,6 @@
 #### Ordem de execução dos scripts:
 
-1 - Execute o arquivo [gerar_dataset_cond_fortaleza.py](./pipeline_gerar_dataset/gerar_dataset_cond_fortaleza.py)</br>
+1 - Execute o arquivo [gerar_dataset_cond_fortaleza.py](./pipeline_gerar_dataset/gerar_dataset_cond_fortaleza.py) **OU** o executável [gerar_dataset_cond_fortaleza.exe](./pipeline_gerar_dataset/gerar_dataset_cond_fortaleza.exe)</br>
 ### OU </br>
 1 - Execute o arquivo [download_dados_receita](./scraping_download_dados_receita/download_dados_receita.ipynb) (a função que executa é 'download_dados_estabelecimentos_empresas()').</br>
 2 - Execute o arquivo [(filtragem_condominios_fortaleza)](./tratamento_arquivos_receita/filtragem_condominios_fortaleza.ipynb) (a função que executa é' filtrar_cond_fortaleza()').</br>
