@@ -1,9 +1,9 @@
 #### Ordem de execução dos scripts:
 
-## Se ainda não tiver dataset gerado:
+## Se ainda não tiver dataset gerado (obs.: a função novos condominios já verifica se já tem algum dataset ou não e executa assim como a gerar_dataset):
 1 - Execute o arquivo [gerar_dataset.py](./pipeline_gerar_dataset/gerar_dataset.py) **OU** o executável [gerar_dataset.exe](./pipeline_gerar_dataset/gerar_dataset.exe)</br>
 ### OU </br>
-## Se já tiver algum dataset gerado e quiser executar o programa de modo a obter o dataset atualizado do mês e além disso obter quais novos condomínios entraram na lista:
+## Se já tiver algum dataset gerado (ou não) e quiser executar o programa de modo a obter o dataset atualizado do mês e além disso obter quais novos condomínios entraram na lista:
 1 - Execute o arquivo [novos_condominios.py](./verif_novos_condominios/novos_condominios.ipynb) **OU** o executável [novos_condominios.exe](./verif_novos_condominios/novos_condominios.ipynb)</br>
 ### OU </br>
 1 - Execute o arquivo [download_dados_receita](./scraping_download_dados_receita/download_dados_receita.ipynb) (a função que executa é 'download_dados_estabelecimentos_empresas()').</br>
