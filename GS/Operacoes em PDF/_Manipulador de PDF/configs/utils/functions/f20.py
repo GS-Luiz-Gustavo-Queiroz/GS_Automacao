@@ -29,10 +29,12 @@ def f20() -> int:
             tot_pags += len(pdf.pages)
             for page in tqdm(pdf.pages):
                 rows = page.extract_text().split('\n')
-                for row in rows:
+                for i, row in enumerate(rows):
                     if 'C Custo' in row or 'Centro Custo' in row:
-                        novo_centro_custo = row.split(': ')[-1].replace('/', '')
-                        novo_codigo = row.split(': ')[2][:-9]
+                        novo_centro_custo = ' '.join(rows[i+1].split()[1:]).replace('/', '')
+                        novo_codigo = row.split()[-1]
+                        # novo_centro_custo = row.split(': ')[-1].replace('/', '')
+                        # novo_codigo = row.split(': ')[2][:-9]
                         break
                 if novo_centro_custo != centro_custo:
                     if len(writer.pages) > 0:
