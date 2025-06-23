@@ -32,9 +32,10 @@ from modelos.GRAFENO.app import GRAFENO
 # path = 'modelos/CORA_GS_FACILITIES/CORA gs-facilites-for_01052025_a_31052025_f8711ab6 (1).pdf'
 # CORA_GS_FACILITIES(path)
 
-path = 'modelos/GRAFENO/HITEC 37 - ABRIL (EXTRATO GRAFENO).xlsx'
-path = 'modelos/GRAFENO/HITEC 37 - MAIO (EXTRATO GRAFENO).xlsx' 
-GRAFENO(path)
+df = GRAFENO('modelos/GRAFENO/HITEC 37 - ABRIL (EXTRATO GRAFENO).xlsx')
+df.to_excel('GRAFENO_FORMATADO.xlsx', index=False)
+
+
 
 # path = 'modelos/GRAFENO_HITEC/GRAFENO HITEC Relatorio_-_Extrato 05.2025.xlsx'
 # GRAFENO_HITEC(path)
