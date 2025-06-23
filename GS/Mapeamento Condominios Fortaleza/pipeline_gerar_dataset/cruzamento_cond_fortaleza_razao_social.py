@@ -21,7 +21,7 @@ def capturar_dataset_empresas(nome_do_arquivo):
     
 
 # %%
-def cruzar_dados_cond_fort_razao_social():
+def cruzar_dados_cond_fort_razao_social(nome_arquivo_final = "condominios_fortaleza_com_razao_social.csv"):
     pasta_atual = os.getcwd()
 
     pasta_arquivos = os.path.join(pasta_atual, '..', "empresas")
@@ -67,7 +67,7 @@ def cruzar_dados_cond_fort_razao_social():
     cond_fortaleza_com_razao_social.insert(3, "razao_social", razao_social)
 
     # #export do arquivo final
-    nome_do_arquivo = os.path.join(pasta_destino, "condominios_fortaleza_com_razao_social.csv")
+    nome_do_arquivo = os.path.join(pasta_destino, nome_arquivo_final)
     nome_do_arquivo = os.path.abspath(nome_do_arquivo)
     cond_fortaleza_com_razao_social.to_csv(nome_do_arquivo, index=False, encoding='latin1')
 

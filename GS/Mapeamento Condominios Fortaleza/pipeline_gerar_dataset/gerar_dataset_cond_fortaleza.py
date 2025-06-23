@@ -2,6 +2,7 @@ import download_dados_receita
 import filtragem_condominios_fortaleza
 import cruzamento_cond_fortaleza_razao_social
 
-download_dados_receita.download_dados_estabelecimentos_empresas()
-filtragem_condominios_fortaleza.filtrar_cond_fortaleza()
-cruzamento_cond_fortaleza_razao_social.cruzar_dados_cond_fort_razao_social()
+def gerar_dataset(nome_arquivo_final = "condominios_fortaleza_com_razao_social.csv"):
+    download_dados_receita.download_dados_estabelecimentos_empresas()
+    filtragem_condominios_fortaleza.filtrar_cond_fortaleza()
+    cruzamento_cond_fortaleza_razao_social.cruzar_dados_cond_fort_razao_social(nome_arquivo_final)
