@@ -1,7 +1,17 @@
 from PyPDF2 import PdfReader
 from typing import List, Dict
+from .arquivo import Arquivo
+from pathlib import Path
 import pandas as pd
 import os
+
+
+def processa_arquivos(path: str) -> pd.DataFrame:
+    df = pd.DataFrame()
+    files = list_all_files([path])
+    for file in files:
+       arq = Arquivo(file)
+
 
 def eh_data(data: str) -> bool:
     """Verifica se uma string representa uma data no formato DD/MM/YYYY."""
@@ -48,4 +58,23 @@ def get_text_from_pdf(path: str) -> List[List[str]]:
     return rows
 
 
+def get_grupos_dir() -> str:
+    """
+    Retorna uma string com o caminho para a pasta 'GRUPOS'.
+    """
+    with open('configs/dir_grupos.txt', 'r') as file:
+        path = file.read()
+    return path
 
+
+def list_all_files(paths: List[str] = None) -> List[str]:
+    if paths is None:
+        paths = ['.']
+    all_files = []
+    for base_path in paths:
+        p = Path(base_path)
+        if p.exists() and p.is_dir():
+            all_files.extend([str(f) for f in p.rglob('*') if f.is_file()])
+        elif p.is_file():
+            all_files.append(str(p))
+    return all_files
