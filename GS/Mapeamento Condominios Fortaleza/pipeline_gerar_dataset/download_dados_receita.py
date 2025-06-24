@@ -30,6 +30,13 @@ OBS.: Faremos o código para capturar os dados das Empresas, para incrementar co
 """
 **Função download, descompactação e renomeação dos arquivos das Empresas:**
 """
+def remover_arquivos(diretorio):
+    arquivos = os.listdir(diretorio)
+
+    for arquivo in arquivos:
+        para_excluir = os.path.join(diretorio, arquivo)
+        para_excluir = os.path.abspath(para_excluir)
+        os.remove(para_excluir)
 
 # %%
 def download_empresas(): #função para download dos arquivos Empresas, descompactação e renomeação
@@ -41,6 +48,8 @@ def download_empresas(): #função para download dos arquivos Empresas, descompa
     pasta_irma = os.path.join(pasta_atual, '..', "empresas")
     pasta_irma = os.path.abspath(pasta_irma)
     os.makedirs(pasta_irma, exist_ok=True)
+
+    remover_arquivos(pasta_irma)
 
     #obtencao do mes e ano
     ano = datetime.datetime.now().year
@@ -93,20 +102,27 @@ def download_empresas(): #função para download dos arquivos Empresas, descompa
         nome_antigo = os.path.join(pasta_irma, arquivo)
         nome_novo = os.path.join(pasta_irma, f"Empresas{indice}.csv")
 
-        os.rename(nome_antigo, nome_novo)
+        try:
+            os.rename(nome_antigo, nome_novo)
+        except:
+            os.remove(nome_novo)
+            os.rename(nome_antigo, nome_novo)
+
         indice = indice + 1
     
 
 # %%
 def download_estabelecimentos(): #função para download dos arquivos Estabelecimentos, descompactação e renomeação
 
-    print("Parte 1.1/3")
+    print("Parte 1.2/3")
     pbar = tqdm(total = 100)
     #criando uma pasta irmã para ser o destino dos arquivos baixados
     pasta_atual = os.getcwd()
     pasta_irma = os.path.join(pasta_atual, '..', "estabelecimentos")
     pasta_irma = os.path.abspath(pasta_irma)
     os.makedirs(pasta_irma, exist_ok=True)
+
+    remover_arquivos(pasta_irma)
 
     #obtencao do mes e ano
     ano = datetime.datetime.now().year
@@ -157,7 +173,12 @@ def download_estabelecimentos(): #função para download dos arquivos Estabeleci
         nome_antigo = os.path.join(pasta_irma, arquivo)
         nome_novo = os.path.join(pasta_irma, f"Estabelecimentos{indice}.csv")
 
-        os.rename(nome_antigo, nome_novo)
+        try:
+            os.rename(nome_antigo, nome_novo)
+        except:
+            os.remove(nome_novo)
+            os.rename(nome_antigo, nome_novo)
+
         indice = indice + 1
 
 
