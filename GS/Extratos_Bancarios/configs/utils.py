@@ -48,4 +48,48 @@ def get_text_from_pdf(path: str) -> List[List[str]]:
     return rows
 
 
+#funçao pra extrair data e saldo do excel
 
+def Extrair_excel(path: str) -> pd.DataFrame:
+    df = pd.read_excel(path, skiprows=7, usecols=[0, 9]) #skiprows = pula a quantidade de linha, usecols = pega apenas as colunas.
+    df.columns = ['Data', 'Saldo']
+    df = df.dropna(subset=['Data', 'Saldo'])
+    df['Data'] = pd.to_datetime(df['Data'], errors='coerce', format='%d/%m/%Y').dropna() # verifica a formatação da data
+    df = df.sort_values(by='Data')
+    df_ultimos = df.groupby(df['Data'].dt.date).tail(1)
+    df_ultimos['Data'] = pd.to_datetime(df_ultimos['Data']).dt.strftime('%d/%m/%Y') 
+    return df_ultimos[['Data', 'Saldo']]
+
+#função para ler a planilha excel
+
+path = 'arquivo.xlsx'  """ou""" 'arquivo.xls'
+df = pd.read_excel(path)
+
+for index, row in df.iterrows():
+    print(f"Linha {index}: {row.to_dict()}")
+
+
+#ler txt
+
+path = 'arquivo.txt'
+
+df = pd.read_csv(path, sep=';', encoding='utf-8') #sep: separa pelo ';'
+
+for index, row in df.iterrows():
+    print(f"Linha {index}: {row.to_dict()}")
+
+
+#função pra extrair txt
+
+def EXTRAIR_TXT(caminho_arquivo: str) -> pd.DataFrame:
+    df = pd.read_csv(caminho_arquivo, sep=';', encoding='utf-8')
+    df['Data_Mov'] = pd.to_datetime(df['Data_Mov'], format='%Y%m%d')
+    df['Valor'] = pd.to_numeric(df['Valor'], errors='coerce')
+
+    df['Valor'] = df.apply(lambda row: row['Valor'] if row['Deb_Cred'] == 'C' else -row['Valor'], axis=1)
+    df['Data'] = df['Data_Mov'].dt.strftime('%d/%m/%Y')
+
+    df_saldo = df.groupby('Data')['Valor'].sum().reset_index()
+    df_saldo = df_saldo.rename(columns={'Valor': 'Saldo'})
+    df = df_saldo
+    return df

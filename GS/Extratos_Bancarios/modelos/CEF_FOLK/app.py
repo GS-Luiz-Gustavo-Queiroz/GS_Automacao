@@ -1,51 +1,12 @@
 import pandas as pd
-import os
 
-def extrair_e_salvar_colunas(caminho_arquivo):
-    extensao = os.path.splitext(caminho_arquivo)[1].lower()
-
-    try:
-        if extensao == '.xls':
-            df = pd.read_excel(caminho_arquivo, header=1)
-        else:
-            print("Apenas arquivos .xls são suportados.")
-            return
-
-        if 'Data Lançamento' not in df.columns or 'Saldo' not in df.columns:
-            print("As colunas 'Data Lançamento' e 'Saldo' devem estar presentes.")
-            return
-
-        df = df[['Data Lançamento', 'Saldo']].rename(columns={'Data Lançamento': 'Data'})
-
-        df['Data'] = pd.to_datetime(df['Data'], dayfirst=True, errors='coerce')
-        df = df.dropna(subset=['Data'])
-
-        # Criar coluna apenas com o dia (sem hora)
-        df['Data_Dia'] = df['Data'].dt.date
-
-        # Ordenar pela data completa (com hora se houver)
-        df = df.sort_values('Data')
-
-        # Pegar a última ocorrência de cada dia
-        df_final = df.groupby('Data_Dia', as_index=False).tail(1).copy()
-
-        # Formatar a data para dd/mm/yyyy
-        df_final['Data'] = df_final['Data'].dt.strftime("%d/%m/%Y")
-
-        df_final = df_final[['Data', 'Saldo']]
-
-        # Salvar
-        novo_caminho = os.path.join(os.path.dirname(caminho_arquivo), 'dados_extraidos.xlsx')
-        df_final.to_excel(novo_caminho, index=False)
-
-        print(f"Arquivo salvo com sucesso em: {novo_caminho}")
-
-    except Exception as e:
-        print("Erro ao processar o arquivo:", e)
-
-def CEF_FOLK(path: str):
-    if os.path.isfile(path) and path.lower().endswith('.xls'):
-        print(f"\nArquivo recebido: {path}")
-        extrair_e_salvar_colunas(path)
-    else:
-        print("Arquivo inválido ou não encontrado (somente arquivos .xls são permitidos).")
+def CEF_FOLK(path: str) -> pd.DataFrame:
+    df = pd.read_excel(path, skiprows=2, usecols=[0, 5])
+    df.columns = ['Data', 'Saldo']
+    df = df.dropna(subset=['Data', 'Saldo'])
+    df['Data'] = pd.to_datetime(df['Data'], errors='coerce', format='%d/%m/%Y').dropna()
+    df = df.sort_values(by='Data')
+    df_ultimos = df.groupby(df['Data'].dt.date).tail(1)
+    df_ultimos['Data'] = pd.to_datetime(df_ultimos['Data']).dt.strftime('%d/%m/%Y')
+    df = df_ultimos
+    return df
