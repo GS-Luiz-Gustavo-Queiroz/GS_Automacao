@@ -7,7 +7,7 @@ def check_update(VERSION: str):
         if VERSION != get_last_version():
             print('Nova versão disponível!')
             print(
-                'Para baixar a nova versão, feche e exclua este arquivo (main.py) e execute o arquivo "download_last_version" dentro da pasta "configs".')
+                'Para baixar a nova versão, feche e exclua este arquivo (app.py) e execute o arquivo "download_last_version" dentro da pasta "configs".')
             input('Para continuar utilizando esta versão, pressione Enter')
 
 def get_last_version():

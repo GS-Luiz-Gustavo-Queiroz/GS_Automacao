@@ -1,26 +1,27 @@
 
-# from modelos.SPX_VISON.main import spx_vision
-# from modelos.CAIXA.app import CAIXA
-# from modelos.AIRBI.app import AIRBI
-# from modelos.BANESTES_RPL.app import BANESTES_RPL
-# from modelos.GRAFENO.app import GRAFENO
-# from modelos.GRAFENO_HITEC.app import GRAFENO_HITEC
-# from modelos.HITEC.app import HITEC
-# from modelos.ITAU.app import ITAU
-# from modelos.ITAU_VISION.app import ITAU_VISION
-# from modelos.SANTANDER.app import SANTANDER
-# from modelos.SANTANDER_SING.app import SANTANDER_SING
-# from modelos.CEF_FOLK.app import CEF_FOLK
-# from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
-# from modelos.SICOOB_JS_ADM.app import sicoob_js_adm
+from modelos.SPX_VISON.app import spx
+from modelos.caixa.app import CAIXA
+from modelos.AIRBI.app import AIRBI
+from modelos.BANESTES_RPL.app import banestes
+from modelos.grafeno.app import GRAFENO
+from modelos.GRAFENO_HITEC.app import GRAFENO_HITEC
+from modelos.HITEC.app import HITEC
+from modelos.itau.app import ITAU
+from modelos.ITAU_VISION.app import ITAU_VISION
+from modelos.santander.app import SANTANDER
+from modelos.SANTANDER_SING.app import SANTANDER_SING
+from modelos.CEF_FOLK.app import CEF_FOLK
+from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
+from modelos.SICOOB_JS_ADM.app import sicoob_js_adm
 from modelos.ENTRIWAY.app import ENTRIWAY
+from modelos.VR_SUPORTE_DE_LOCACAO.app import vr
 
 
 
 # df = AIRBI('modelos/AIRBI/AIRBI SOLUCAOextrato_0003740223_de_02-06-2025_ate_09-06-2025.xlsx')
 # df.to_excel('planilha_teste.xlsx', index=False)
 
-# df = BANESTES_RPL('modelos/BANESTES_RPL/BANESTES RPL.xlsx')
+# df = banestes('modelos/BANESTES_RPL/BANESTES RPL.xlsx')
 # df.to_excel('BANESTES_RPL_FORMATADO.xlsx', index=False)
 
 # df = CAIXA('modelos/CAIXA/HITEC 37 - ABRIL (EXTRATO CAIXA).txt')
@@ -59,5 +60,9 @@ from modelos.ENTRIWAY.app import ENTRIWAY
 # df  = sicoob_js_adm('modelos/SICOOB_JS_ADM/SICOOB - JS ADM  EXTRATO BANCARIO -.pdf')
 # df.to_excel('SICOOB_FORMATADO.xlsx', index=False)
 
-df = ENTRIWAY('modelos/ENTRIWAY/ENTRIWAY Extrato 05.2025.xls')
-df.to_excel('ENTRIWAY_FORMATADO.xlsx', index=False)
+# df = ENTRIWAY('modelos/ENTRIWAY/ENTRIWAY Extrato 05.2025.xls')
+# df.to_excel('ENTRIWAY_FORMATADO.xlsx', index=False)
+
+# df = vr('modelos/VR_SUPORTE_DE_LOCACAO/VR.csv')
+
+df =

@@ -4,7 +4,7 @@ import sys
 import os
 # Adiciona a raiz do projeto ao path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from configs.utils import data_to_excel, get_text_from_pdf
+from configs.utils import dict_to_df, get_text_from_pdf
 
 
 def eh_registro(row: str) -> bool:
@@ -13,9 +13,9 @@ def eh_registro(row: str) -> bool:
     return row[0].isnumeric() and row.endswith(' C')
 
 
-def spx_vision(path: str) -> None:
+def spx(path: str) -> pd.DataFrame:
     pages: List[List[str]] = get_text_from_pdf(path)
-    registros: List[List[str]] = []
+    registros = {}
 
     for page in pages:
         for row in page:
@@ -33,7 +33,7 @@ def spx_vision(path: str) -> None:
             saldo = row[-2][1:]
             saldo = saldo.translate(str.maketrans({'.': '', ',': '.'}))
 
-            registros.append([data, saldo])
-            print([data, saldo])
+            registros[data] = saldo
 
-    data_to_excel(registros, path)
+    df = dict_to_df(registros)
+    return df
