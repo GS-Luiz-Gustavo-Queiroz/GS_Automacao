@@ -13,6 +13,7 @@
 # from modelos.CEF_FOLK.app import CEF_FOLK
 # from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
 # from modelos.SICOOB_JS_ADM.app import sicoob_js_adm
+from modelos.ENTRIWAY.app import ENTRIWAY
 
 
 
@@ -58,3 +59,5 @@
 # df  = sicoob_js_adm('modelos/SICOOB_JS_ADM/SICOOB - JS ADM  EXTRATO BANCARIO -.pdf')
 # df.to_excel('SICOOB_FORMATADO.xlsx', index=False)
 
+df = ENTRIWAY('modelos/ENTRIWAY/ENTRIWAY Extrato 05.2025.xls')
+df.to_excel('ENTRIWAY_FORMATADO.xlsx', index=False)
