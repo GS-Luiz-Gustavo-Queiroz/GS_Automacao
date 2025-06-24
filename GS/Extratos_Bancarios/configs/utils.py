@@ -6,11 +6,7 @@ import pandas as pd
 import os
 
 
-def processa_arquivos(path: str) -> pd.DataFrame:
-    df = pd.DataFrame()
-    files = list_all_files([path])
-    for file in files:
-       arq = Arquivo(file)
+
 
 
 def eh_data(data: str) -> bool:
@@ -92,21 +88,21 @@ def Extrair_excel(path: str) -> pd.DataFrame:
 
 #função para ler a planilha excel
 
-path = 'arquivo.xlsx'  """ou""" 'arquivo.xls'
-df = pd.read_excel(path)
-
-for index, row in df.iterrows():
-    print(f"Linha {index}: {row.to_dict()}")
+# path = 'arquivo.xlsx'  """ou""" 'arquivo.xls'
+# df = pd.read_excel(path)
+#
+# for index, row in df.iterrows():
+#     print(f"Linha {index}: {row.to_dict()}")
 
 
 #ler txt
 
-path = 'arquivo.txt'
-
-df = pd.read_csv(path, sep=';', encoding='utf-8') #sep: separa pelo ';'
-
-for index, row in df.iterrows():
-    print(f"Linha {index}: {row.to_dict()}")
+# path = 'arquivo.txt'
+#
+# df = pd.read_csv(path, sep=';', encoding='utf-8') #sep: separa pelo ';'
+#
+# for index, row in df.iterrows():
+#     print(f"Linha {index}: {row.to_dict()}")
 
 
 #função pra extrair txt
