@@ -13,7 +13,7 @@ def eh_registro(row: str) -> bool:
     return row[0].isnumeric() and row.endswith(' C')
 
 
-def spx(path: str) -> pd.DataFrame:
+def SPX_VISION(path: str) -> pd.DataFrame:
     pages: List[List[str]] = get_text_from_pdf(path)
     registros = {}
 
@@ -32,6 +32,7 @@ def spx(path: str) -> pd.DataFrame:
             # Encontra e formata o saldo.
             saldo = row[-2][1:]
             saldo = saldo.translate(str.maketrans({'.': '', ',': '.'}))
+            saldo = saldo.replace('.', ',')
 
             registros[data] = saldo
 

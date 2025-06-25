@@ -18,9 +18,10 @@ def formatar_saldo(saldo: str) -> str:
     saldo_formatado = saldo_formatado.replace(',','.')
     saldo_formatado = [char for char in saldo_formatado if char.isnumeric() or char == '.']
     saldo_formatado = ''.join(saldo_formatado)
+    saldo_formatado = saldo_formatado.replace('.', ',')
     return saldo_formatado
 
-def sicoob_js_adm(path: str) -> pd.DataFrame:
+def SICOOB_JS_ADM(path: str) -> pd.DataFrame:
     pages = get_text_from_pdf(path)
     registros = {}
     for page in pages:
