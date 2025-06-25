@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import warnings
 warnings.simplefilter("ignore", UserWarning)
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 
@@ -15,7 +16,7 @@ def main() -> None:
     # if not os.path.exists(path):
     #     raise Exception('Caminho para a pasta "GRUPOS" não encontrada.')
 
-    path = 'C:\\Users\\User132\\Downloads\\GRUPOS'
+    path = 'C:\\Users\\Usuario\\OneDrive - KMF - CONSULTORIA EMPRESARIAL E TREINAMENTOS LTDA - ME\\Área de Trabalho\\GRUPOS'
 
     df = processa_arquivos(path)
     df.to_excel('Arquivos_formatados.xlsx', index=False)

@@ -1,12 +1,12 @@
-from modelos.CAIXA.app import CAIXA
+from modelos.caixa.app import CAIXA
 from modelos.AIRBI.app import AIRBI
 from modelos.BANESTES_RPL.app import banestes
-from modelos.GRAFENO.app import GRAFENO
+from modelos.grafeno.app import GRAFENO
 from modelos.GRAFENO_HITEC.app import GRAFENO_HITEC
 from modelos.HITEC.app import HITEC
-from modelos.ITAU.app import ITAU
+from modelos.itau.app import ITAU
 from modelos.ITAU_VISION.app import ITAU_VISION
-from modelos.SANTANDER.app import SANTANDER
+from modelos.santander.app import SANTANDER
 from modelos.SANTANDER_SING.app import SANTANDER_SING
 from modelos.CEF_FOLK.app import CEF_FOLK
 from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
@@ -30,8 +30,8 @@ from modelos.SPX_VISON.app import SPX_VISION
 # df = CEF_FOLK('modelos/CEF_FOLK/CEF FOLK 2025-06-09-08-47-14-006681292000578216851.xls')
 # df.to_excel('CEF_FOLK_FORMATADO.xlsx', index=False)
 
-# df = CORA_GS_FACILITIES('modelos/CORA_GS_FACILITIES/CORA gs-facilites-for_01052025_a_31052025_f8711ab6 (1).pdf')
-# df.to_excel('CORA_GS_FACILITIES.xlsx', index=False)
+df = CORA_GS_FACILITIES('modelos/CORA_GS_FACILITIES/CORA gs-facilites-for_01052025_a_31052025_f8711ab6 (1).pdf')
+df.to_excel('CORA_GS_FACILITIES.xlsx', index=False)
 
 # df = GRAFENO('modelos/GRAFENO/HITEC 37 - ABRIL (EXTRATO GRAFENO).xlsx')
 # df.to_excel('GRAFENO_FORMATADO.xlsx', index=False)
@@ -63,8 +63,8 @@ from modelos.SPX_VISON.app import SPX_VISION
 # df = SANTANDER_SING('modelos/SANTANDER_SING/SANTANDER sing 95 EXTRATO.xls')
 # df.to_excel('SANTANDER_SING_FORMATADO.xlsx', index=False)
 
-df = SPX_VISION('modelos/SPX_VISON/SPX VISON.pdf')
-df.to_excel('SPX_VISION_FORMATADO.xlsx', index=False)
+# df = SPX_VISION('modelos/SPX_VISON/SPX VISON.pdf')
+# df.to_excel('SPX_VISION_FORMATADO.xlsx', index=False)
 
 # df  = SICOOB_JS_ADM('modelos/SICOOB_JS_ADM/SICOOB - JS ADM  EXTRATO BANCARIO -.pdf')
 # df.to_excel('SICOOB_FORMATADO.xlsx', index=False)
