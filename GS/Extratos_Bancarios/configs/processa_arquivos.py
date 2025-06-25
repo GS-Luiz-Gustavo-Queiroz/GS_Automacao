@@ -11,21 +11,22 @@ from modelos.AIRBI.app import AIRBI  # Sem uso
 from modelos.BANESTES_RPL.app import banestes
 from modelos.BB_CONDO_PREST.app import bb_condoprest
 from modelos.BRADESCO_HISYSTEM.app import bradesco_hisystem
-from modelos.caixa.app import CAIXA
+from modelos.CAIXA.app import CAIXA
 from modelos.CEF_FOLK.app import CEF_FOLK
 from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
 from modelos.ENTRIWAY.app import ENTRIWAY
-from modelos.grafeno.app import GRAFENO
+from modelos.GRAFENO.app import GRAFENO
 from modelos.GRAFENO_HITEC.app import GRAFENO_HITEC  # Redundante
 from modelos.hitec_37_spx.app import hitec_37_spx  # Redundante
 from modelos.INTER_SING.app import inter_sing
-from modelos.itau.app import ITAU
+from modelos.ITAU.app import ITAU
 from modelos.ITAU_VISION.app import ITAU_VISION  # Redundante
-from modelos.santander.app import SANTANDER
+from modelos.SANTANDER.app import SANTANDER
 from modelos.SANTANDER_SING.app import SANTANDER_SING  # Redundante
-from modelos.SICOOB_JS_ADM.app import sicoob_js_adm
-from modelos.SPX_VISON.app import spx
-from modelos.VR_SUPORTE_DE_LOCACAO.app import vr
+from modelos.SICOOB_JS_ADM.app import SICOOB_JS_ADM
+from modelos.SPX_VISON.app import SPX_VISION
+from modelos.VR_SUPORTE_DE_LOCACAO.app import VR_SUPORTE
+
 
 
 
@@ -64,11 +65,11 @@ def processa_arquivos(path: str) -> pd.DataFrame:
             case '0023 - HISEG BA - SANTANDER CONTA CORRENTE' | '0003 - G A TERCEIRIZAÇÕES - SANTANDER' | '0015 - MONITOR - SANTANDER CONTA CORRENTE' | '0033 - HISYSTEM - SANTANDER CONTA CORRENTE' | '0122 - HITEC - SANTANDER APLICAÇÃO' | '0002 - HITEC - SANTANDER CONTA CORRENTE':
                 new_df = SANTANDER(file)
             case '0034 - CONDOS - SICOOB' | '0027 - HISEG BA - SICOOB CONTA CAPITAL' | '0007 - CONDONAL SERVIÇO - SICOOB (MARKETING)' | '0008 - CONDONAL SERVIÇO - SICOOB 41' | '0026 - HISEG BA - SICOOB CONTA CORRENTE' | '0038 - ESSENCIAL CONDOMINIOS - SICOOB' | '0170 - 26 - CONDONAL TERCEIRIZAÇÃO - SICOOB 980' | '0057 - SICOOB - MARGATRAN' | '0051 - CONDLIMP (CONTROL PRIME) - SICOOB' | '0056 - SICOOB - VITORIAGATTI' | '0048 - CONDAP J2 - SICOOB':
-                new_df = sicoob_js_adm(file)
+                new_df = SICOOB_JS_ADM(file)
             case '0140 - 03 - CONDAP J2 - SPX BANK' | '0152 - 17 - MARGATRAN - SPX BANK' | '0144 - 07 - CONDO APOIO P & R - SPX BANK' | '0155 - 20 - CONDONAL ADM 06 - SPX BANK' | '0046 - SPX BANK - FACILITIES' | '0147 - 12 - ESSENCIAL ADM - SPX BANK' | '0050 - SPX BANK - SELECT' | '0142 - 05 - CONDLIMP - SPX BANK' | '0145 - 10 - CONDONAL SERV - SPX BANK' | '0101 - 08 - SPX BANK - UNICA 09' | '0123 - MONITOR - SPX BANK' | '0129 - HITEC ES - SPX BANK' | '0048 - SPX BANK - TERCEIRIZAÇÕES' | '0148 - 13 - ESSENCIAL CONDOMINIO - SPX BANK' | '0131 - GVP - SPX BANK' | '0097 - 09 - SPX BANK - UNICA 61' | '0130 - HISEG BA - SPX BANK' | '0026 - SPX BANK - G.A' | '0058 - 07 - SPX BANK - CONDO GROUP' | '0131 - HIPAR - SPX BANK' | '0138 - 01 - ABC ADMINISTRADORA  - SPX BANK' | '0100 - 04 - SPX BANK - UNICA 15' | '0137 - 09 - CONDONAL COMERCIO - SPX BANK' | '0135 - 08 - CONDONAL ADM RPJ - SPX BANK' | '0099 - 11 - SPX BANK - UNICA 00' | '0130 - KIENEN - SPX BANK' | '0095 - 05 - SPX BANK - UNICA 70' | '0104 - 01 - SPX - PEGASUS 62' | '0126 - HISYSTEM - SPX BANK' | '0159 - 18 - RUBI - SPX BANK' | '0142 - ENTRIWAY - SPX BANK' | '0172 - 26 - CONDONAL TERCEIRIZAÇÃO - SPX BANK' | '0143 - 06 - CONDO LOCACAO - SPX BANK' | '0139 - PRIMEE PORTARIA - SPX BANK' | '0150 - 15 - ESSENCIAL APOIO ADM - SPX BANK' | '0149 - 14 - ESSENCIAL GEST E SER - SPX BANK' | '0141 - ENTRI - SPX BANK' | '0057 - 48 - SPX BANK - GESTCON' | '0133 - TCM - SPX BANK' | '0128 - NEOPORT - SPX BANK' | '0151 - 16 - VITORIAGATTI - SPX BANK' | '0173 - 29 - INTELLECTUS SERVIÇOS - SPX BANK' | '0094 - 06 - SPX BANK - UNICA 01' | '0146 - 11 - CONDOS ADM DE CONDOM - SPX BANK' | '0059 - 80FL - SPX BANK - CONDO FILIAL' | '0132 - HISEG ES - SPX BANK' | '0096 - 10 - SPX BANK - UNICA 30' | '0049 - SPX BANK - GOLD' | '0129 - FOLK - SPX BANK' | '0174 - 28 - NEXUS ADMINISTRAÇÃO - SPX BANK' | '0103 - 07 - SPX BANK - UNICA 59' | '0141 - 04 - CONDLIMP (CONTROL PRIME) - SPX' | '0001 - DAYO - SPX BANCK' | '0128 - HITEC BA - SPX BANK' | '0125 - LURAHSEG - SPX BANK' | '0132 - FK PR - SPX BANK' | '0102 - 02 - SPX BANK - UNICA 42' | '0127 - HITEC - SPX BANK' | '0139 - 02 - CONDAP - PREST - SPX BANK' | '0098 - 03 - SPX BANK - UNICA 51':
-                new_df = spx(file)
+                new_df = SPX_VISION(file)
             case '0028 - HISEG BA - VR CASHBACK' | '0019 - VR BENEFICIOS - UNICA 42' | '0007 - VR BENEFICIOS - UNICA 01' | '0042 - TCM - VR CASHBACK' | '0021 - MONITOR - VR CASHBACK' | '0004 - VR BENEFICIOS - UNICA 00' | '0032 - VR BENEFICIOS - UNICA 70' | '0026 - VR BENEFICIOS - UNICA 59' | '0037 - HISYSTEM - VR CASHBACK' | '0010 - HITEC - VR CASHBACK' | '0022 - VR BENEFICIOS - UNICA 51' | '0013 - VR BENEFICIOS - UNICA 15' | '0029 - VR BENEFICIOS - UNICA 61' | '0016 - VR BENEFICIOS - UNICA 30' | '0010 - VR BENEFICIOS - UNICA 09' | '0035 - VR BENEFICIOS - PEGASUS 62':
-                new_df = vr(file)
+                new_df = VR_SUPORTE(file)
             case _:
                 erros.append(f'Não adaptada para a instituição financeira - {instituicao_fin} - {file}')
                 continue

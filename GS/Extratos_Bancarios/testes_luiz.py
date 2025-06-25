@@ -1,22 +1,19 @@
-
-from modelos.SPX_VISON.app import spx
-from modelos.caixa.app import CAIXA
+from modelos.CAIXA.app import CAIXA
 from modelos.AIRBI.app import AIRBI
 from modelos.BANESTES_RPL.app import banestes
-from modelos.grafeno.app import GRAFENO
+from modelos.GRAFENO.app import GRAFENO
 from modelos.GRAFENO_HITEC.app import GRAFENO_HITEC
 from modelos.HITEC.app import HITEC
-from modelos.itau.app import ITAU
+from modelos.ITAU.app import ITAU
 from modelos.ITAU_VISION.app import ITAU_VISION
-from modelos.santander.app import SANTANDER
+from modelos.SANTANDER.app import SANTANDER
 from modelos.SANTANDER_SING.app import SANTANDER_SING
 from modelos.CEF_FOLK.app import CEF_FOLK
 from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
-from modelos.SICOOB_JS_ADM.app import sicoob_js_adm
+from modelos.SICOOB_JS_ADM.app import SICOOB_JS_ADM
 from modelos.ENTRIWAY.app import ENTRIWAY
-from modelos.VR_SUPORTE_DE_LOCACAO.app import vr
-
-
+from modelos.VR_SUPORTE_DE_LOCACAO.app import VR_SUPORTE
+from modelos.SPX_VISON.app import SPX_VISION
 
 # df = AIRBI('modelos/AIRBI/AIRBI SOLUCAOextrato_0003740223_de_02-06-2025_ate_09-06-2025.xlsx')
 # df.to_excel('planilha_teste.xlsx', index=False)
@@ -27,6 +24,9 @@ from modelos.VR_SUPORTE_DE_LOCACAO.app import vr
 # df = CAIXA('modelos/CAIXA/HITEC 37 - ABRIL (EXTRATO CAIXA).txt')
 # df.to_excel('CAIXA_FORMATADO.xlsx', index=False)
 
+# df = CAIXA('modelos/CAIXA/HITEC 37 - MAIO (EXTRATO CAIXA).txt')
+# df.to_excel('CAIXA2_FORMATADO.xlsx', index=False)
+
 # df = CEF_FOLK('modelos/CEF_FOLK/CEF FOLK 2025-06-09-08-47-14-006681292000578216851.xls')
 # df.to_excel('CEF_FOLK_FORMATADO.xlsx', index=False)
 
@@ -35,6 +35,9 @@ from modelos.VR_SUPORTE_DE_LOCACAO.app import vr
 
 # df = GRAFENO('modelos/GRAFENO/HITEC 37 - ABRIL (EXTRATO GRAFENO).xlsx')
 # df.to_excel('GRAFENO_FORMATADO.xlsx', index=False)
+
+# df = GRAFENO('modelos/GRAFENO/HITEC 37 - MAIO (EXTRATO GRAFENO).xlsx')
+# df.to_excel('GRAFENO2_FORMATADO.xlsx', index=False)
 
 # df = GRAFENO_HITEC('modelos/GRAFENO_HITEC/GRAFENO HITEC Relatorio_-_Extrato 05.2025.xlsx')
 # df.to_excel('GRAFENO_HITEC_FORMATADO.xlsx', index=False)
@@ -45,24 +48,30 @@ from modelos.VR_SUPORTE_DE_LOCACAO.app import vr
 # df = ITAU('modelos/ITAU/HITEC 37 - ABRIL (EXTRATO ITAU).xls')
 # df.to_excel('ITAU_FORMATADO.xlsx', index=False)
 
+# df = ITAU('modelos/ITAU/HITEC 37 - MAIO (EXTRATO ITAU) (1).xls')
+# df.to_excel('ITAU2_FORMATADO.xlsx', index=False)
+
 # df = ITAU_VISION('modelos/ITAU_VISION/ITAU VISON Extrato_0546-145699-09-06-2025.xls')
 # df.to_excel('ITAU_VISION_FORMATADO.xlsx', index=False)
 
 # df = SANTANDER('modelos/SANTANDER/HITEC 37 - MAIO (EXTRATO SANTANDER).xls')
 # df.to_excel('SANTANDER_FORMATADO.xlsx', index=False)
 
+# df = SANTANDER('modelos/SANTANDER/HITEC 37 - ABRIL (EXTRATO SANTANDER) (1).xls')
+# df.to_excel('SANTANDER2_FORMATADO.xslx', index=False)
+
 # df = SANTANDER_SING('modelos/SANTANDER_SING/SANTANDER sing 95 EXTRATO.xls')
 # df.to_excel('SANTANDER_SING_FORMATADO.xlsx', index=False)
 
-# path = 'modelos/SPX_VISON/SPX VISON.pdf'
-# spx_vision(path)
+df = SPX_VISION('modelos/SPX_VISON/SPX VISON.pdf')
+df.to_excel('SPX_VISION_FORMATADO.xlsx', index=False)
 
-# df  = sicoob_js_adm('modelos/SICOOB_JS_ADM/SICOOB - JS ADM  EXTRATO BANCARIO -.pdf')
+# df  = SICOOB_JS_ADM('modelos/SICOOB_JS_ADM/SICOOB - JS ADM  EXTRATO BANCARIO -.pdf')
 # df.to_excel('SICOOB_FORMATADO.xlsx', index=False)
 
 # df = ENTRIWAY('modelos/ENTRIWAY/ENTRIWAY Extrato 05.2025.xls')
 # df.to_excel('ENTRIWAY_FORMATADO.xlsx', index=False)
 
-# df = vr('modelos/VR_SUPORTE_DE_LOCACAO/VR.csv')
+# df = VR_SUPORTE('modelos/VR_SUPORTE_DE_LOCACAO/VR.csv')
+# df.to_excel('VR_SUPORTE_FORMATADO.xlsx', index=False)
 
-df =

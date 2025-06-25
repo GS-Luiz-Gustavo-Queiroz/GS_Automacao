@@ -11,11 +11,11 @@ warnings.simplefilter("ignore", UserWarning)
 
 def main() -> None:
     # Caminho para a pasta 'GRUPOS'.
-    path = get_grupos_dir()
-    if not os.path.exists(path):
-        raise Exception('Caminho para a pasta "GRUPOS" não encontrada.')
+    # path = get_grupos_dir()
+    # if not os.path.exists(path):
+    #     raise Exception('Caminho para a pasta "GRUPOS" não encontrada.')
 
-    path = 'C:\\Users\\Usuario\\OneDrive - KMF - CONSULTORIA EMPRESARIAL E TREINAMENTOS LTDA - ME\\Área de Trabalho\\GRUPOS'
+    path = 'C:\\Users\\User132\\Downloads\\GRUPOS'
 
     df = processa_arquivos(path)
     df.to_excel('Arquivos_formatados.xlsx', index=False)
