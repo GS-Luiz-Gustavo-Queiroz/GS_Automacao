@@ -12,7 +12,7 @@ def get_creds() -> Dict[str, str]:
     return creds
 
 
-def get_data(creds) -> List[str]:
+def atualizar_pastas(creds) -> List[str]:
     try:
         # Cria a conexão.
         conn = pymssql.connect(server=creds['s'], user=creds['u'],
@@ -59,7 +59,7 @@ def get_data(creds) -> List[str]:
         data = cursor.fetchall()
         pastas: List[str] = []
         # Formata o nome dos arquivos.
-        for row in tqdm(data):
+        for row in data:
             row = ['GRUPOS'] + [item.translate(str.maketrans({'/': '', '\\': '', '|': ''})) for item in row]
             pasta = '/'.join(row)
             # Cria a pasta.
@@ -78,8 +78,7 @@ def get_data(creds) -> List[str]:
 if __name__ == '__main__':
     try:
         creds = get_creds()
-        pastas = get_data(creds)
-        for pasta in pastas: print(pasta)
+        pastas = atualizar_pastas(creds)
     except Exception as e:
         print(e)
         input()
