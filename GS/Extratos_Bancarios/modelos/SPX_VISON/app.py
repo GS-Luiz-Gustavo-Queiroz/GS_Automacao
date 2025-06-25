@@ -33,7 +33,6 @@ def SPX_VISION(path: str) -> pd.DataFrame:
             saldo = row[-2][1:]
             saldo = saldo.translate(str.maketrans({'.': '', ',': '.'}))
             saldo = saldo.replace('.', ',')
-
             registros[data] = saldo
 
     df = dict_to_df(registros)
