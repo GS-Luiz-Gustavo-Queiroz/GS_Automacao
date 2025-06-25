@@ -23,5 +23,5 @@ def CORA_GS_FACILITIES(path: str) -> pd.DataFrame:
                         valor = match_valor.group(1)
                         dados_extraidos.append((data, valor))
 
-    df = pd.DataFrame(dados_extraidos, columns=['Data', 'Valor'])
+    df = pd.DataFrame(dados_extraidos, columns=['Data', 'Saldo'])
     return df
