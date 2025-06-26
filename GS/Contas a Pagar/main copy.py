@@ -49,12 +49,18 @@ class Aut:
             cursor.execute("""
                 SELECT
                     EMP.Nome,
-                    CPG.EST_Codigo, 
+                    PED.EST_Codigo,
                     EST.Nome AS EST_Nome,
                     VCP.[Data] AS DT_VENCIMENTO,
                     DPE.[Path] AS CAMINHO_ARQUIVO,
-                    VCP.CPG_Codigo AS CODIGO_CONTAS_PAGAR,
-                    VCP.Sequencial AS SEQUENCIAL_CONTAS_PAGAR
+                    PED.CODIGO AS CODIGO_PEDIDO,
+                    CPG.Codigo AS CODIGO_CONTAS_PAGAR,
+                    VCP.Sequencial AS SEQUENCIAL_CONTAS_PAGAR,
+                    PED.CampoExtra1 AS CONTAS_AVULSAS,
+                    PED.CampoExtra2 AS FORMA_PAGAMENTO,
+                    PED.CampoExtra3 AS NOTA,
+                    PED.CampoExtra4 AS SETOR,
+                    PED.CAMPOEXTRA6 AS TIPO
                 FROM PED
                 LEFT JOIN DPE
                     ON DPE.EMP_Codigo = PED.EMP_CODIGO AND DPE.PED_Codigo = PED.CODIGO
@@ -63,18 +69,18 @@ class Aut:
                 LEFT JOIN VCP
                     ON VCP.EMP_Codigo = CPG.EMP_Codigo AND VCP.CPG_Codigo = CPG.Codigo
                 LEFT JOIN EST
-                    ON EST.EMP_Codigo = CPG.EMP_Codigo AND EST.Codigo = CPG.EST_Codigo
+                    ON EST.EMP_Codigo = PED.EMP_Codigo AND EST.Codigo = PED.EST_Codigo
                 LEFT JOIN EMP
-                    ON EST.EMP_Codigo = EMP.Codigo 
-                WHERE CPG.CODIGO IS NOT NULL;
+                    ON EST.EMP_Codigo = EMP.Codigo;
                 """)
             """
                 Criação de uma lista que irá guardar os resultados da consulta, onde cada item do dicionário será
             um dicionário, com as chaves 'ped_codigo', que é o código do pedido, e 'path' que é o caminho até o arquivo
             referente ao pedido.
             """
-            columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'dt_vencimento', 'path', 'COD_cpg', 'sequencial']
+            columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'dt_vencimento', 'path', 'cod_ped', 'COD_cpg', 'sequencial', 'contas_avulsas', 'forma_pag', 'nota', 'setor', 'tipo']
             df = pd.DataFrame(cursor.fetchall(), columns=columns)
+            #apagar dps
             df.to_excel("teste.xlsx", index=False)
             # Remove valores nulos.
             df.dropna( inplace=True)
@@ -107,7 +113,7 @@ class Aut:
 
     def run(self) -> None:
         self.init_dir(self.dir_dest)  # Cria a pasta de destino dos arquivos.
-        st = time.time()
+        st = time.time() #hora de inicio do codigo para contar o tempo de execução
         self.processa_arquivos()
         exec_time = time.time() - st  # Calcula o tempo de execução do código.
         data = datetime.now().strftime("%d/%m/%Y")
