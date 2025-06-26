@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import random
+import time
 
 CAMINHO_PLANILHA = 'C:\\Users\\user244\\Documents\\CONTROLE_DE_ENVIOS_DET_(18.06).xlsx'
 DOMINIO_EMAIL = 'outlook.com'
@@ -39,6 +40,7 @@ def atualizar_planilha_com_emails(caminho_arquivo):
 
         df.to_excel(caminho_arquivo, index=False)
         print("Planilha atualizada com emails e senhas.")
+        time.sleep(3)
 
     except Exception as e:
         print(f"[ERRO] Ocorreu um problema: {e}")
