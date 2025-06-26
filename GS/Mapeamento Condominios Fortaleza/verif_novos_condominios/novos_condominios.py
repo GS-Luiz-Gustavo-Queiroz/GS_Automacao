@@ -68,9 +68,9 @@ def gerar_novo_dataset():
         os.rename(condominios_fortaleza_novo, condominios_fortaleza_antigo) #troca o nome novo pelo nome do antigo
         #ou seja troca "condominios_fortaleza_com_razao_social_atualizado.csv" por "condominios_fortaleza_com_razao_social.csv"
     except:
+        os.rename(condominios_fortaleza_novo, condominios_fortaleza_antigo)
         pass
 
-    os.rename(condominios_fortaleza_novo, condominios_fortaleza_antigo)
 
     return dataset, condominios_adicionados
 
