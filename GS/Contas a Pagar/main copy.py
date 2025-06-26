@@ -134,6 +134,7 @@ class Aut:
                                             [self.troca_disco(path_orig, disco, 2) for disco in self.discos]
             for path in all_possible_paths:
                 if not os.path.exists(path) or not os.path.isfile(path):
+                # if os.path.exists(path) or os.path.isfile(path):
                     continue
                 grupo: str = row['Grupo']
                 estabelecimento: str = row['EST_nome']
