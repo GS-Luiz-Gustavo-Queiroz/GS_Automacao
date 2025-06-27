@@ -1,5 +1,6 @@
 from typing import Dict, List
 from tqdm import tqdm
+import pandas as pd
 import pymssql
 import os
 
@@ -57,6 +58,8 @@ def get_data(creds) -> List[str]:
         referente ao pedido.
         """
         data = cursor.fetchall()
+        pd.DataFrame(data).to_excel( 'empresas.xlsx', index=False)
+        exit()
         pastas: List[str] = []
         # Formata o nome dos arquivos.
         for row in tqdm(data):
@@ -64,7 +67,6 @@ def get_data(creds) -> List[str]:
             pasta = '/'.join(row)
             # Cria a pasta.
             os.makedirs(pasta, exist_ok=True)
-
         # Encerrando a conexão
         conn.close()
         cursor.close()
@@ -79,7 +81,7 @@ if __name__ == '__main__':
     try:
         creds = get_creds()
         pastas = get_data(creds)
-        for pasta in pastas: print(pasta)
+        #for pasta in pastas: print(pasta)
     except Exception as e:
         print(e)
         input()
