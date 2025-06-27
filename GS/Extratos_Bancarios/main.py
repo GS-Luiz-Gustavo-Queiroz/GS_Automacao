@@ -13,12 +13,13 @@ except Exception as e:
     print(e)
     input()
 
+
 def main() -> None:
     atualizar_pastas(get_creds())
     # Caminho para a pasta 'GRUPOS'.
     path = get_grupos_dir()
     if not os.path.exists(path):
-        raise Exception('Caminho para a pasta "GRUPOS" não encontrada.')
+        raise Exception('Caminho para a pasta "GRUPOS" não encontrado.')
 
     df = processa_arquivos(path)
     df.to_excel('Arquivos_formatados.xlsx', index=False)
