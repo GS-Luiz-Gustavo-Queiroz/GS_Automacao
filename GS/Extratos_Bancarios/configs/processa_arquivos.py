@@ -12,17 +12,17 @@ from modelos.AIRBI.app import AIRBI  # Sem uso
 from modelos.BANESTES_RPL.app import banestes
 from modelos.BB_CONDO_PREST.app import bb_condoprest
 from modelos.BRADESCO_HISYSTEM.app import bradesco_hisystem
-from modelos.caixa.app import CAIXA
+from modelos.CAIXA.app import CAIXA
 from modelos.CEF_FOLK.app import CEF_FOLK
 from modelos.CORA_GS_FACILITIES.app import CORA_GS_FACILITIES
 from modelos.ENTRIWAY.app import ENTRIWAY
-from modelos.grafeno.app import GRAFENO
+from modelos.GRAFENO.app import GRAFENO
 from modelos.GRAFENO_HITEC.app import GRAFENO_HITEC  # Redundante
 from modelos.hitec_37_spx.app import hitec_37_spx  # Redundante
 from modelos.INTER_SING.app import inter_sing
-from modelos.itau.app import ITAU
+from modelos.ITAU.app import ITAU
 from modelos.ITAU_VISION.app import ITAU_VISION  # Redundante
-from modelos.santander.app import SANTANDER
+from modelos.SANTANDER.app import SANTANDER
 from modelos.SANTANDER_SING.app import SANTANDER_SING  # Redundante
 from modelos.SICOOB_JS_ADM.app import SICOOB_JS_ADM
 from modelos.SPX_VISON.app import SPX_VISION
