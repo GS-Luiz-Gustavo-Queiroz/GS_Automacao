@@ -81,7 +81,7 @@ class Aut:
             columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'dt_vencimento', 'path', 'cod_ped', 'COD_cpg', 'sequencial', 'contas_avulsas', 'forma_pag', 'nota', 'setor', 'tipo']
             df = pd.DataFrame(cursor.fetchall(), columns=columns)
             #apagar dps
-            df.to_excel("teste.xlsx", index=False)
+            df.to_excel("teste_yuri.xlsx", index=False)
             # Remove valores nulos.
             df.dropna( inplace=True)
             # Remove valores do df com datas acima da data mínima.
