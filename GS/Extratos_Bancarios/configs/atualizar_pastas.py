@@ -12,7 +12,7 @@ def get_creds() -> Dict[str, str]:
     return creds
 
 
-def atualizar_pastas(creds) -> List[str]:
+def atualizar_pastas(creds, path) -> List[str]:
     try:
         # Cria a conexão.
         conn = pymssql.connect(server=creds['s'], user=creds['u'],
@@ -60,7 +60,7 @@ def atualizar_pastas(creds) -> List[str]:
         pastas: List[str] = []
         # Formata o nome dos arquivos.
         for row in data:
-            row = ['GRUPOS'] + [item.translate(str.maketrans({'/': '', '\\': '', '|': ''})) for item in row]
+            row = [path] + [item.translate(str.maketrans({'/': '', '\\': '', '|': ''})) for item in row]
             pasta = '/'.join(row)
             # Cria a pasta.
             os.makedirs(pasta, exist_ok=True)
