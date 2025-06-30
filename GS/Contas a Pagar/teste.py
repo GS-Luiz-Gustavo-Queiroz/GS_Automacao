@@ -1,3 +1,4 @@
-from fuzzywuzzy import fuzz
+from datetime import datetime
 
-fuzz.partial_ratio('SIM', 'SIMM')
+data1 = datetime(2025, 6, 20)
+print(data1.strftime('%d-%m-%Y'))
