@@ -81,14 +81,14 @@ def processa_arquivos(path: str) -> pd.DataFrame:
         new_df['estabelecimento'] = estabelecimento
         new_df['instituicao_financeira'] = instituicao_fin
         df = pd.concat([df, new_df], ignore_index=True)
-
-    df = df[['grupo', 'estabelecimento', 'instituicao_financeira', 'Data', 'Saldo']]
-    salva_erros(erros)
-    data = datetime.now().strftime("%d/%m/%Y")
-    exec_time = time.time() - st
-    salva_relatorio([[data, 'Extratos Bancários', len(files), exec_time]])
-    if not os.path.exists('logs'):
-        os.mkdir('logs')
-    pd.DataFrame(arquivos_processados).to_excel('logs/arquivos_processados.xlsx', index=False)
-    pd.DataFrame(files).to_excel('logs/arquivos_encontrados.xlsx', index=False)
+        df = df[['grupo', 'estabelecimento', 'instituicao_financeira', 'Data', 'Saldo']]
+        salva_erros(erros)
+        data = datetime.now().strftime("%d/%m/%Y")
+        exec_time = time.time() - st
+        salva_relatorio([[data, 'Extratos Bancários', len(files), exec_time]])
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        pd.DataFrame(arquivos_processados).to_excel('logs/arquivos_processados.xlsx', index=False)
+        pd.DataFrame(files).to_excel('logs/arquivos_encontrados.xlsx', index=False)
+    
     return df
