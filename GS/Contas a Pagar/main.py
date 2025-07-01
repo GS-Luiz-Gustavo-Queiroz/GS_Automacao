@@ -20,6 +20,7 @@ class Aut:
         self.dir_dest = dir_dest
         self.creds: Dict[str, str] = self.get_creds()
         self.vencimento: str = self.get_vencimento()
+        self.informes: List[str] = []
         self.df: pd.DataFrame = self.get_data()
         self.erros: List[List[str]] = []
         self.discos: List[str] = self.listar_discos()
@@ -109,12 +110,12 @@ class Aut:
             """
             columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'status','dt_pedido', 'dt_vencimento', 'path', 'cond_pag', 'cod_ped', 'COD_cpg', 'sequencial', 'cont_avuls', 'form_pag', 'nota', 'setor', 'tipo', 'tipo_pedido']
             df = pd.DataFrame(cursor.fetchall(), columns=columns)
-            df.to_excel("todas_contas_a_pagar.xlsx", index=False)
+            # df.to_excel("todas_contas_a_pagar.xlsx", index=False)
             # filtra os dados com valores de vencimento igual ao especificado
             df = self.filtra_data(df)
             # Corrige a coluna dt_vencimento.
             df['dt_vencimento'] = df['dt_vencimento'].dt.strftime('%d-%m-%Y')
-            df.to_excel("contas_a_pagar_filtrados_data.xlsx", index=False)
+            # df.to_excel("contas_a_pagar_filtrados_data.xlsx", index=False)
             # Encerrando a conexão
             conn.close()
             cursor.close()
@@ -123,13 +124,11 @@ class Aut:
             qtdd_arquivos = len(df['cod_ped'])
             qtdd_pedidos = len(df['cod_ped'].unique())
 
+            self.informes.append(f"Quantidade de pedidos: {qtdd_pedidos}")
+            self.informes.append(f"Quantidade de arquivos copiados: {qtdd_arquivos}")
+
             print(f"Quantidade de pedidos: {qtdd_pedidos}")
             print(f"Quantidade de arquivos a serem copiados: {qtdd_arquivos}")
-
-            with open('informes.txt', 'w') as file:
-                file.write(f'Quantidade de pedidos: {qtdd_pedidos}\n')
-                file.write(f'Quantidade de arquivos a serem copiados: {qtdd_arquivos}\n')
-            os.startfile('informes.txt')
             #FIM DO CODIGO DO LOG
 
             return df
@@ -160,6 +159,7 @@ class Aut:
         values = [[data, 'Contas a Pagar', len(self.df), exec_time]]  # Valores para serem salvos no relatório.
         self.salva_relatorio(values)
         self.mostra_erros()
+        self.mostra_informes()
 
     def filtra_data(self, df: pd.DataFrame) -> pd.DataFrame:
         data = pd.to_datetime(self.vencimento, format="%d/%m/%Y")
@@ -224,6 +224,13 @@ class Aut:
         else:
             print('Sem erros ocorridos.')
         input('Digite enter para encerrar.')
+    
+    def mostra_informes(self) -> None: #EXIBE O LOG INFORMATIVO QUANTIDADE DE ARQUIVOS / QUANTIDADE DE PEDIDOS
+        with open('informes.txt', 'w') as file:
+            file.write(self.informes[0])
+            file.write('\n')
+            file.write(self.informes[1])
+        os.startfile('informes.txt')
 
     def salva_relatorio(self, row: List[List]):
         SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -271,6 +278,7 @@ class Aut:
 
 if __name__ == '__main__':
     try:
+        print("Aguarde alguns segundos...")
         aut = Aut()
         aut.run()
     except Exception as e:
