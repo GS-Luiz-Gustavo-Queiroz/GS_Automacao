@@ -1,3 +1,3 @@
 import psutil
 
-print(type(psutil.disk_partitions(all=True)[0]))
+print(type(psutil.disk_partitions(all=True)[2]))
