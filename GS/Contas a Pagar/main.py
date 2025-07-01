@@ -51,12 +51,33 @@ class Aut:
                     EMP.Nome,
                     PED.EST_Codigo,
                     EST.Nome AS EST_Nome,
-                    VCP.[Data] AS DT_VENCIMENTO,
+                    CASE
+                        WHEN PED.STATUS = 2 THEN 'REJEITADO'
+                        WHEN PED.STATUS = 1 THEN 'APROVADO'
+                        WHEN PED.STATUS = 0 THEN 'AGUARDANDO APROVACAO'
+                        ELSE 'OUTRO' 
+                    END AS STATUS,
+                    PED.[DATA] AS DT_PEDIDO,
+                    CASE
+                        WHEN VCP.[Data] IS NOT NULL
+                            THEN VCP.[Data]
+                        ELSE VCP_ENT.[Data]
+                    END AS DT_VENCIMENTO,
                     DPE.[Path] AS CAMINHO_ARQUIVO,
+                    PED.CondicaoPagamento AS CONDICAO_PAGAMENTO,
                     PED.CODIGO AS CODIGO_PEDIDO,
-                    CPG.Codigo AS CODIGO_CONTAS_PAGAR,
-                    VCP.Sequencial AS SEQUENCIAL_CONTAS_PAGAR,
-                    PED.CampoExtra1 AS NOTA
+                    CONCAT(CPG.Codigo, ENT.CPG_CODIGO) AS CODIGO_CONTAS_PAGAR,
+                    CONCAT( VCP.Sequencial, VCP_ENT.Sequencial ) AS SEQUENCIAL_CONTAS_PAGAR,
+                    PED.CampoExtra3 AS CONTAS_AVULSAS,
+                    PED.CampoExtra2 AS FORMA_PAGAMENTO,
+                    PED.CampoExtra1 AS NOTA,
+                    PED.CampoExtra4 AS SETOR,
+                    PED.CAMPOEXTRA6 AS TIPO,
+                    CASE
+                        WHEN ENT.CODIGO IS NOT NULL
+                            THEN 'PEDIDO COM NOTA'
+                        ELSE 'PEDIDO AVULSO'
+                    END AS TIPO_PEDIDO    
                 FROM PED
                 LEFT JOIN DPE
                     ON DPE.EMP_Codigo = PED.EMP_CODIGO AND DPE.PED_Codigo = PED.CODIGO
@@ -67,29 +88,49 @@ class Aut:
                 LEFT JOIN EST
                     ON EST.EMP_Codigo = PED.EMP_Codigo AND EST.Codigo = PED.EST_Codigo
                 LEFT JOIN EMP
-                    ON EST.EMP_Codigo = EMP.Codigo;
+                    ON EST.EMP_Codigo = EMP.Codigo
+                LEFT JOIN ENT
+                    ON
+                        ENT.EMP_Codigo = PED.EMP_CODIGO
+                        AND ENT.PED_CODIGO = PED.CODIGO
+                LEFT JOIN CPG AS CPG_ENT
+                    ON
+                        CPG_ENT.EMP_CODIGO = ENT.EMP_CODIGO
+                        AND CPG_ENT.CODIGO = ENT.CPG_CODIGO
+                LEFT JOIN VCP AS VCP_ENT
+                    ON 
+                        VCP_ENT.EMP_Codigo = CPG_ENT.EMP_Codigo 
+                        AND VCP_ENT.CPG_Codigo = CPG_ENT.Codigo;
                 """)
             """
                 Criação de uma lista que irá guardar os resultados da consulta, onde cada item do dicionário será
             um dicionário, com as chaves 'ped_codigo', que é o código do pedido, e 'path' que é o caminho até o arquivo
             referente ao pedido.
             """
-            # columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'dt_vencimento', 'path', 'COD_cpg', 'sequencial']
-            # columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'dt_vencimento', 'path', 'cod_ped', 'COD_cpg', 'sequencial', 'contas_avulsas', 'forma_pag', 'nota', 'setor', 'tipo']
-            columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'dt_vencimento', 'path', 'cod_ped', 'COD_cpg', 'sequencial', 'nota']
+            columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'status','dt_pedido', 'dt_vencimento', 'path', 'cond_pag', 'cod_ped', 'COD_cpg', 'sequencial', 'cont_avuls', 'form_pag', 'nota', 'setor', 'tipo', 'tipo_pedido']
             df = pd.DataFrame(cursor.fetchall(), columns=columns)
-            df.to_excel("teste.xlsx", index=False)
-            # Remove valores nulos.
-            # df.dropna( inplace=True)
-            df = df[(df['nota'] == 'SIM') | (~df['COD_cpg'].isna())]
-            # Remove valores do df com datas acima da data mínima.
+            df.to_excel("todas_contas_a_pagar.xlsx", index=False)
+            # filtra os dados com valores de vencimento igual ao especificado
             df = self.filtra_data(df)
             # Corrige a coluna dt_vencimento.
             df['dt_vencimento'] = df['dt_vencimento'].dt.strftime('%d-%m-%Y')
+            df.to_excel("contas_a_pagar_filtrados_data.xlsx", index=False)
             # Encerrando a conexão
-            df.to_excel("teste_apos_tratamento.xlsx", index=False)
             conn.close()
             cursor.close()
+
+            #GERANDO LOG INFORMATIVO QUANTIDADE DE ARQUIVOS E QUANTIDADE DE PEDIDOS
+            qtdd_arquivos = len(df['cod_ped'])
+            qtdd_pedidos = len(df['cod_ped'].unique())
+
+            print(f"Quantidade de pedidos: {qtdd_pedidos}")
+            print(f"Quantidade de arquivos a serem copiados: {qtdd_arquivos}")
+
+            with open('informes.txt', 'w') as file:
+                file.write(f'Quantidade de pedidos: {qtdd_pedidos}\n')
+                file.write(f'Quantidade de arquivos a serem copiados: {qtdd_arquivos}\n')
+            os.startfile('informes.txt')
+            #FIM DO CODIGO DO LOG
 
             return df
         except Exception as e:
@@ -127,49 +168,52 @@ class Aut:
     def processa_arquivos(self) -> None:
         for _, row in tqdm(self.df.iterrows(), total=len(self.df)):
             path_orig: str = row['path']
-            # Verifica se o arquivo existe em cada disco.
-            all_possible_paths: List[str] = [path_orig] + \
-                                            [self.troca_disco(path_orig, disco, 1) for disco in self.discos] + \
-                                            [self.troca_disco(path_orig, disco, 2) for disco in self.discos]
-            for path in all_possible_paths:
-                if not os.path.exists(path) or not os.path.isfile(path):
-                    continue
-                grupo: str = row['Grupo']
-                estabelecimento: str = row['EST_nome']
-                vencimento: str = row['dt_vencimento']
-                cod_cpg: str = row['COD_cpg']
-                dir_grupo: str = f'{self.dir_dest}/{grupo}'
-                dir_est: str = f'{dir_grupo}/{estabelecimento}'
-                dir_ven: str = f'{dir_est}/{vencimento}'
-                # Verifica se já existe a pasta do grupo, estabelecimento e vencimento.
-                self.init_dir(dir_grupo)
-                self.init_dir(dir_est)
-                self.init_dir(dir_ven)
-                # Define o novo caminho do arquivo.
-                nome = path.split('\\')[-1]  # Acessa o nome do arquivo.
-                extensao = nome[nome.rfind('.'):]  # Acessa a extensão do arquivo.
-                nome = nome[:nome.rfind('.')]  # Remove a extensão do nome do arquivo.
-                # Define o nome junto do codigo do CPG, nome antigo e o vencimento.
-                novo_nome = f'{cod_cpg} - {nome} - {vencimento}{extensao}'
-                new_path = f'{dir_ven}/{novo_nome}'  # Junta o novo nome com o diretório de destino do vencimento.
-                try:
-                    shutil.copy(path, new_path)
-                    break
-                except FileNotFoundError:
-                    # Pode ocorrer file not found error quando o nome do arquivo é muito grande.
-                    # Então vai ser tentado apenas diminuir o tamanho do arquivo.
-                    # O i cria um id para os arquivos, para não haver arquivos de mesmo nome.
-                    i = len(os.listdir(dir_ven))
-                    novo_nome = f'{dir_ven}/{cod_cpg}-{i}-{vencimento}{extensao}'
+            try:
+                # Verifica se o arquivo existe em cada disco.
+                all_possible_paths: List[str] = [path_orig] + \
+                                                [self.troca_disco(path_orig, disco, 1) for disco in self.discos] + \
+                                                [self.troca_disco(path_orig, disco, 2) for disco in self.discos]
+                for path in all_possible_paths:
+                    if not os.path.exists(path) or not os.path.isfile(path):
+                        continue
+                    grupo: str = row['Grupo']
+                    estabelecimento: str = row['EST_nome']
+                    vencimento: str = row['dt_vencimento']
+                    cod_cpg: str = row['COD_cpg']
+                    dir_grupo: str = f'{self.dir_dest}/{grupo}'
+                    dir_est: str = f'{dir_grupo}/{estabelecimento}'
+                    dir_ven: str = f'{dir_est}/{vencimento}'
+                    # Verifica se já existe a pasta do grupo, estabelecimento e vencimento.
+                    self.init_dir(dir_grupo)
+                    self.init_dir(dir_est)
+                    self.init_dir(dir_ven)
+                    # Define o novo caminho do arquivo.
+                    nome = path.split('\\')[-1]  # Acessa o nome do arquivo.
+                    extensao = nome[nome.rfind('.'):]  # Acessa a extensão do arquivo.
+                    nome = nome[:nome.rfind('.')]  # Remove a extensão do nome do arquivo.
+                    # Define o nome junto do codigo do CPG, nome antigo e o vencimento.
+                    novo_nome = f'{cod_cpg} - {nome} - {vencimento}{extensao}'
+                    new_path = f'{dir_ven}/{novo_nome}'  # Junta o novo nome com o diretório de destino do vencimento.
                     try:
-                        shutil.copy(path, novo_nome)
+                        shutil.copy(path, new_path)
+                        break
                     except FileNotFoundError:
-                        # Se o erro persistir, o arquivo será ignorado.
-                        self.erros.append([path, new_path])
-                except PermissionError:
-                    self.erros.append(['Permissão negada', path])
-            else:
-                self.erros.append(['não encontrado', path_orig])
+                        # Pode ocorrer file not found error quando o nome do arquivo é muito grande.
+                        # Então vai ser tentado apenas diminuir o tamanho do arquivo.
+                        # O i cria um id para os arquivos, para não haver arquivos de mesmo nome.
+                        i = len(os.listdir(dir_ven))
+                        novo_nome = f'{dir_ven}/{cod_cpg}-{i}-{vencimento}{extensao}'
+                        try:
+                            shutil.copy(path, novo_nome)
+                        except FileNotFoundError:
+                            # Se o erro persistir, o arquivo será ignorado.
+                            self.erros.append([path, new_path])
+                    except PermissionError:
+                        self.erros.append(['Permissão negada', path])
+                else:
+                    self.erros.append(['não encontrado', path_orig])
+            except:
+                pass
 
     def mostra_erros(self) -> None:
         if self.erros:
