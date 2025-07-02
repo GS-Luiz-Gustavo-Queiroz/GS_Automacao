@@ -158,6 +158,7 @@ class Aut_nfs_eusebio:
                     break
                 sleep(1)
             sleep(3)
+
             # Renomeia as notas
             for nota in [file for file in os.listdir('notas') if '.pdf' in file]:
                 nota = f'notas/{nota}'
@@ -171,12 +172,13 @@ class Aut_nfs_eusebio:
                     if 'DADOS DO TOMADOR' in row:
                         num_nf = rows[i + 1][-4:]
                         break
-                # Encontra o nome do condomínio
+                # Encontra o nome do condomínio.
                 for row in rows:
                     if 'Competência' in row:
                         condominio = row[:row.find('Competência')]
+                        condominio = condominio.translate(str.maketrans({'\\': '', '/': '', '|': ''}))
                         break
-                # Encontra o nome da empresa
+                # Encontra o nome da empresa.
                 for row in rows:
                     if 'Nome Fantasia' in row:
                         empresa = row[row.find('Nome Fantasia') + 13:]
