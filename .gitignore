@@ -37,3 +37,5 @@ GS/Operacoes em PDF/_Manipulador de PDF/configs/utils/functions/__pycache__/
 *.ODS
 *.ofc
 *.jpeg
+/build
+*.spec
