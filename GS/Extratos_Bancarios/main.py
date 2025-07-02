@@ -1,4 +1,3 @@
-
 from configs.processa_arquivos import processa_arquivos
 from configs.utils import list_all_files, salva_erros, salva_relatorio
 from configs.utils import get_grupos_dir
