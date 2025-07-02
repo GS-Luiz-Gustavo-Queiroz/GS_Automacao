@@ -13,7 +13,7 @@ def cobranca_automatizada():
 
     #BLOCO DE TESTES# APAGAR DEPOIS
     for _, i in df.iterrows():
-        i['email_cli'] = 'controladoria.gestao@gscsc.com.br'
+        i['email_cli'] = 'ti.automacao03@gscsc.com.br'
     #FIM DO BLOCO DE TESTES#
 
     for _, registro in df.iterrows():
