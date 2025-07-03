@@ -18,7 +18,7 @@ def f04() -> int:
             for page_pdf in tqdm(pdf_reader.pages):
                 page = page_pdf.extract_text().split('\n')
                 for i, row in enumerate(page):
-                    if 'UF:CEP:Data Vencimento: ' in row:
+                    if 'CEP:Data Vencimento: ' in row:
                         condominio = row[row.rfind(':') + 2:]
                         cnpj = ''.join(char for char in page[i + 1] if char.isnumeric())
                         break
