@@ -1,4 +1,5 @@
 import os
+import openpyxl 
 import re
 import shutil
 from PyPDF2 import PdfReader
@@ -10,19 +11,29 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
+import pytesseract
+import fitz
+from PIL import Image
+import cv2 as cv
+import numpy as np
 
 
 class GerenciadorDocumentos:
     def __init__(self):
-        self.base_dir = 'GS/envio_boletos_nfs/SINGULAR_FACILITIES_CE'
+        self.base_dir = self.selecionar_pasta_base()
+        if not self.base_dir:
+            print("\nNenhuma pasta selecionada. Encerrando o programa.")
+            exit(1)
+
         self.boletos_dir = os.path.join(self.base_dir, 'BOLETOS')
         self.nfs_dir = os.path.join(self.base_dir, 'NOTAS FISCAIS')
-        self.organizados_dir = 'GS/arquivos_organizados'
+        self.organizados_dir = os.path.join(self.base_dir, 'arquivos_organizados')
 
-        self.CPF_PATTERN = r'\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11}'
-        self.CNPJ_PATTERN = r'\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}|\d{14}'
-        self.CNPJ_IGNORADO = "16707848000195"
-
+        self.CPF_PATTERN = r'\d{3}\.\d{3}\.\d{3}-\d{2}'
+        self.CNPJ_PATTERN = r'\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}'
+        self.CNPJS_IGNORADOS = {"16707848000195", "16707848000519", "40226542000100", "16./07.848/0001-19"}
 
         self.CNPJ_PARA_EMAIL = {}  
         self.CNPJ_PARA_DADOS = {}
@@ -30,6 +41,12 @@ class GerenciadorDocumentos:
         self.email_credenciais = self._ler_credenciais_email()
         self.carregar_dados_mes_cliente()
 
+    def selecionar_pasta_base(self) -> Optional[str]:
+        root = tk.Tk()
+        root.withdraw()
+        caminho = filedialog.askdirectory(title="Selecione a pasta base contendo as subpastas (BOLETOS, NOTAS FISCAIS, etc.)")
+        root.destroy()
+        return caminho
 
     def _ler_credenciais_email(self, arquivo=None) -> Dict[str, Optional[str]]:
         if arquivo is None:
@@ -68,49 +85,98 @@ class GerenciadorDocumentos:
     def extrair_texto_pdf(self, caminho_pdf: str) -> List[str]:
         if not os.path.exists(caminho_pdf):
             return []
-        with open(caminho_pdf, 'rb') as arquivo:
-            leitor = PdfReader(arquivo)
-            primeira_pagina = leitor.pages[0]
-            return primeira_pagina.extract_text().split('\n')
+
+        try:
+            with open(caminho_pdf, 'rb') as arquivo:
+                leitor = PdfReader(arquivo)
+                primeira_pagina = leitor.pages[0]
+                texto = primeira_pagina.extract_text()
+                if texto and texto.strip():
+                    return texto.split('\n')
+        except Exception as e:
+            print(f"\nErro ao extrair texto com PyPDF2: {e}")
+
+        print(f"\nTentando OCR para {os.path.basename(caminho_pdf)}...")
+        return self._extrair_texto_ocr(caminho_pdf)
+
+
+    def _pdf_para_imagem(self, caminho_pdf: str, imagem_saida: str = 'temp_pagina.jpg', pagina: int = 0) -> str:
+        try:
+            doc = fitz.open(caminho_pdf)
+            page = doc.load_page(pagina)
+            pix = page.get_pixmap(dpi=300)
+            pix.save(imagem_saida)
+            doc.close()
+            return imagem_saida
+        except Exception as e:
+            print(f"\nErro ao converter PDF em imagem: {e}")
+            return ""
+
+    def _preprocessar_imagem(self, imagem_path: str):
+        img = cv.imread(imagem_path)
+        if img is None:
+            raise ValueError(f"Erro ao carregar a imagem: {imagem_path}")
+        scale_percent = 200
+        width = int(img.shape[1] * scale_percent / 100)
+        height = int(img.shape[0] * scale_percent / 100)
+        img = cv.resize(img, (width, height), interpolation=cv.INTER_LANCZOS4)
+        img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        _, img = cv.threshold(img, 150, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+        return img
+
+    def _extrair_texto_ocr(self, caminho_pdf: str) -> List[str]:
+        try:
+            imagem_path = self._pdf_para_imagem(caminho_pdf)
+            if not imagem_path:
+                return []
+            imagem = self._preprocessar_imagem(imagem_path)
+            texto = pytesseract.image_to_string(imagem, lang='por')
+            linhas = texto.split('\n')
+            return [linha.strip() for linha in linhas if linha.strip()]
+        except Exception as e:
+            print(f"\nErro ao realizar OCR: {e}")
+            return []
+
 
     def encontrar_documento_boleto(self, linhas_texto: List[str]) -> Optional[str]:
         cnpjs = []
         cpfs = []
 
         for linha in linhas_texto:
-            if 'CNPJ:' in linha or 'CPF/CNPJ:' in linha:
-                partes = linha.split()
-                if partes:
-                    doc_bruto = partes[-1]
-                    doc_limpo = self.limpar_cnpj(doc_bruto)
-                    if len(doc_limpo) == 14:
-                        cnpjs.append(doc_limpo)
-                    elif len(doc_limpo) == 11:
-                        cpfs.append(doc_limpo)
+            encontrados = re.findall(self.CNPJ_PATTERN, linha)
+            for cnpj in encontrados:
+                cnpj_limpo = self.limpar_cnpj(cnpj)
+                if cnpj_limpo not in self.CNPJS_IGNORADOS:
+                    cnpjs.append(cnpj_limpo)
 
-            cpfs_encontrados = re.findall(self.CPF_PATTERN, linha)
-            for cpf in cpfs_encontrados:
+            encontrados_cpfs = re.findall(self.CPF_PATTERN, linha)
+            for cpf in encontrados_cpfs:
                 cpfs.append(self.limpar_cpf(cpf))
 
-        if cnpjs:
-            return cnpjs[1] if len(cnpjs) >= 2 else cnpjs[0]
+        if len(cnpjs) >= 2:
+            return cnpjs[1]
+        elif len(cnpjs) == 1:
+            return cnpjs[0]
         elif cpfs:
             return cpfs[0]
         return None
+
 
     def encontrar_documentos_nf(self, texto: str) -> List[str]:
         documentos = []
 
         cnpjs = re.findall(self.CNPJ_PATTERN, texto)
         for cnpj in cnpjs:
-            if cnpj != self.CNPJ_IGNORADO:
-                documentos.append(self.limpar_cnpj(cnpj))
+            cnpj_limpo = self.limpar_cnpj(cnpj)
+            if cnpj_limpo not in self.CNPJS_IGNORADOS:
+                documentos.append(cnpj_limpo)
 
         cpfs = re.findall(self.CPF_PATTERN, texto)
         for cpf in cpfs:
             documentos.append(self.limpar_cpf(cpf))
 
         return documentos
+
     
     def organizar_boletos(self) -> None:
             destino = os.path.join(self.organizados_dir, 'Boletos_organizados')
@@ -259,10 +325,55 @@ class GerenciadorDocumentos:
         for pasta in todas_pastas:
             origem = os.path.join(caminho_origem, pasta)
             destino = os.path.join(enviados_dir if pasta in enviados else nao_enviados_dir, pasta)
+
+            if os.path.exists(destino):
+                shutil.rmtree(destino)
+            
             shutil.copytree(origem, destino)
-        
+
         print(f"\nPastas separadas em:\n - Enviados: {enviados_dir}\n - Não enviados: {nao_enviados_dir}")
 
+    def calcular_porcentagem_nfs_enviadas(self) -> None:
+        import pandas as pd
+
+        base_separadas = os.path.join(self.organizados_dir, 'Pastas_Separadas')
+        enviados_dir = os.path.join(base_separadas, 'enviados')
+        nao_enviados_dir = os.path.join(base_separadas, 'nao_enviados')
+
+        def contar_pdfs_nfs_em_pasta(pasta_base: str) -> int:
+            total = 0
+            if not os.path.exists(pasta_base):
+                return 0
+            for documento in os.listdir(pasta_base):
+                caminho_doc = os.path.join(pasta_base, documento)
+                if os.path.isdir(caminho_doc):
+                    arquivos_pdf = [f for f in os.listdir(caminho_doc) if f.lower().endswith('.pdf')]
+                    total += len(arquivos_pdf)
+            return total
+
+        enviados_nfs = contar_pdfs_nfs_em_pasta(enviados_dir)
+        nao_enviados_nfs = contar_pdfs_nfs_em_pasta(nao_enviados_dir)
+        total_nfs = enviados_nfs + nao_enviados_nfs
+
+        if total_nfs == 0:
+            print("\nNenhum arquivo PDF encontrado nas pastas enviados e não enviados para cálculo.")
+            return
+
+        pct_enviados = (enviados_nfs / total_nfs) * 100
+        pct_nao_enviados = (nao_enviados_nfs / total_nfs) * 100
+
+        df_resumo = pd.DataFrame({
+            'Status': ['Enviados', 'Não Enviados', 'Total'],
+            'Quantidade': [enviados_nfs, nao_enviados_nfs, total_nfs],
+            'Porcentagem (%)': [round(pct_enviados, 2), round(pct_nao_enviados, 2), 100.0]
+        })
+
+        arquivo_saida = os.path.join(os.getcwd(), 'GS/envio_boletos_nfs/resumo_nf_enviadas.xlsx')
+        try:
+            df_resumo.to_excel(arquivo_saida, index=False)
+            print(f"\nResumo de NFs enviadas e não enviadas salvo em: {arquivo_saida}")
+        except Exception as e:
+            print(f"\nErro ao salvar o arquivo Excel: {e}")
 
 
     def enviar_emails(self) -> bool:
@@ -351,8 +462,9 @@ Sistema Automático de envio de Faturamento"""
         server.quit()
         print(f"\nTotal de emails enviados com sucesso: {enviados}")
         self.separar_enviados_nao_enviados(enviados_ids)
+        self.calcular_porcentagem_nfs_enviadas()
         return enviados > 0
-
+        
 
     def executar(self) -> None:
         print("\n=== INÍCIO DO PROCESSAMENTO ===")
@@ -369,7 +481,6 @@ Sistema Automático de envio de Faturamento"""
             print("\nAviso: Nenhum CNPJ mapeado para envio de emails.")
         print("\n=== PROCESSAMENTO CONCLUÍDO ===")
         print(f"Resultados disponíveis em: {os.path.abspath(self.organizados_dir)}")
-
 
 if __name__ == "__main__":
     gerenciador = GerenciadorDocumentos()
