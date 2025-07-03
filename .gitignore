@@ -38,3 +38,4 @@ GS/Operacoes em PDF/_Manipulador de PDF/configs/utils/functions/__pycache__/
 *.HTML
 /build
 *.spec
+/GS/Operacoes em PDF/Boletos SPX/configs/tess
