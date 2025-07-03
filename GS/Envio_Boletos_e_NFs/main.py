@@ -14,14 +14,15 @@ import pandas as pd
 
 class GerenciadorDocumentos:
     def __init__(self):
-        self.base_dir = 'GS/Envio_Boletos_e_NFs/CONDOMINIAIS2'
+        self.base_dir = 'GS/envio_boletos_nfs/SINGULAR_FACILITIES_CE'
         self.boletos_dir = os.path.join(self.base_dir, 'BOLETOS')
-        self.nfs_dir = os.path.join(self.base_dir, 'NOTA_FISCAL')
-        self.organizados_dir = 'GS/Envio_Boletos_e_NFs/arquivos_organizados'
+        self.nfs_dir = os.path.join(self.base_dir, 'NOTAS FISCAIS')
+        self.organizados_dir = 'GS/arquivos_organizados'
 
-        self.CPF_PATTERN = r'\d{3}\.\d{3}\.\d{3}\-\d{2}'
-        self.CNPJ_PATTERN = r'\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}'
-        self.CNPJ_IGNORADO = "16.707.848/0001-95"
+        self.CPF_PATTERN = r'\d{3}\.\d{3}\.\d{3}-\d{2}|\d{11}'
+        self.CNPJ_PATTERN = r'\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}|\d{14}'
+        self.CNPJ_IGNORADO = "16707848000195"
+
 
         self.CNPJ_PARA_EMAIL = {}  
         self.CNPJ_PARA_DADOS = {}
@@ -156,7 +157,7 @@ class GerenciadorDocumentos:
                     documentos = self.encontrar_documentos_nf(texto)
                     
                     if documentos:
-                        documento_limpo = documentos[0]  # Pega o primeiro documento encontrado
+                        documento_limpo = documentos[0]  
                         pasta_destino = os.path.join(destino, documento_limpo)
                         self.criar_diretorio(pasta_destino)
                         shutil.copy2(caminho_completo, os.path.join(pasta_destino, arquivo))
@@ -202,7 +203,7 @@ class GerenciadorDocumentos:
                 for item in os.listdir(origem):
                     shutil.copy2(os.path.join(origem, item), pasta_destino)
 
-    def carregar_dados_mes_cliente(self, caminho='GS/envio_boletos_nfs/emails.xlsx') -> None:
+    def carregar_dados_mes_cliente(self, caminho='GS/envio_boletos_nfs/emails.teste.xlsx') -> None:
         if not os.path.exists(caminho):
             print(f"\nAviso: Planilha de dados não encontrada em: {caminho}")
             return
@@ -241,9 +242,31 @@ class GerenciadorDocumentos:
         except Exception as e:
             print(f"\nErro ao carregar planilha de dados: {e}")
 
+    def separar_enviados_nao_enviados(self, enviados: List[str]) -> None:
+        destino_base = os.path.join(self.organizados_dir, 'Pastas_Separadas')   
+        enviados_dir = os.path.join(destino_base, 'enviados')
+        nao_enviados_dir = os.path.join(destino_base, 'nao_enviados')
+
+        self.criar_diretorio(enviados_dir)
+        self.criar_diretorio(nao_enviados_dir)
+
+        caminho_origem = os.path.join(self.organizados_dir, 'Pastas_Mescladas')
+        todas_pastas = [
+            pasta for pasta in os.listdir(caminho_origem)
+            if os.path.isdir(os.path.join(caminho_origem, pasta)) and pasta != 'nfs sem documento'
+        ]
+
+        for pasta in todas_pastas:
+            origem = os.path.join(caminho_origem, pasta)
+            destino = os.path.join(enviados_dir if pasta in enviados else nao_enviados_dir, pasta)
+            shutil.copytree(origem, destino)
+        
+        print(f"\nPastas separadas em:\n - Enviados: {enviados_dir}\n - Não enviados: {nao_enviados_dir}")
+
 
 
     def enviar_emails(self) -> bool:
+        enviados_ids = []
         if not self.email_credenciais['usuario'] or not self.email_credenciais['senha']:
             print("\nErro: Credenciais de email não configuradas corretamente.")
             return False
@@ -287,7 +310,7 @@ class GerenciadorDocumentos:
 
             msg = MIMEMultipart()
             msg['From'] = self.email_credenciais['usuario']
-            msg['To'] = destinatario
+            msg['To'] = ', '.join(destinatario)
             msg['Subject'] = f"Faturamento {cliente} - {mes_ano}"
 
             corpo = f"""
@@ -301,7 +324,7 @@ Sistema Automático de envio de Faturamento"""
 
             anexos_com_sucesso = 0
             for arquivo in arquivos:
-                caminho_completo = os.path.join(pasta_documento, arquivo)
+                caminho_completo = os.path.join(pasta_documento, arquivo)   
                 try:
                     with open(caminho_completo, "rb") as anexo:
                         part = MIMEBase('application', 'octet-stream')
@@ -320,13 +343,16 @@ Sistema Automático de envio de Faturamento"""
             try:
                 server.sendmail(self.email_credenciais['usuario'], destinatario, msg.as_string())
                 print(f"\nEmail enviado para {destinatario} (Documento: {documento})")
+                enviados_ids.append(documento)
                 enviados += 1
             except Exception as e:
                 print(f"\nFalha ao enviar email para {destinatario}: {e}")
 
         server.quit()
         print(f"\nTotal de emails enviados com sucesso: {enviados}")
+        self.separar_enviados_nao_enviados(enviados_ids)
         return enviados > 0
+
 
     def executar(self) -> None:
         print("\n=== INÍCIO DO PROCESSAMENTO ===")
