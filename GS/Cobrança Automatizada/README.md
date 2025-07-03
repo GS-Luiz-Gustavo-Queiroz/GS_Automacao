@@ -1,0 +1,4 @@
+A sequência de chamada de função é a seguinte:
+1 - Na main (ou de 5 dias de atraso ou de 2 dias antes do atraso) a função cobranca_automatizada chama as funções de leitura de credenciais do banco de dados e os dados do remetente em arquivos de texto na pasta configs.
+2 - Após isso, ainda na função cobranca_automatizada os dados seram capturados com a funcao get_data (de atraso de 5 dias ou 2 dias antes do atraso).
+3 - Teremos então um loop para enviar um e-mail para cada cliente que está com pendência, então apenas tratamos a data que tem no registro de pendencia com a funcao data_venc e então mandamos o e-mail com a funcao enviar_email (de atraso de 5 dias ou 2 dias antes do atraso).
