@@ -5,6 +5,7 @@ from get_data import get_data_atraso_5_dias
 from enviar_email import enviar_email_5_dias_atraso
 from data_venc import data_venc
 from tqdm import tqdm
+from tratar_email import tratar_email
 
 def cobranca_automatizada():
     creds_db = ler_credenciais_db()
@@ -14,7 +15,7 @@ def cobranca_automatizada():
 
     #BLOCO DE TESTES# APAGAR DEPOIS
     for _, i in df.iterrows():
-        i['email_cli'] = 'pedrosilva.asl2015@gmail.com'
+        i['email_cli'] = 'ti.automacao03@gscsc.com.br'
     #FIM DO BLOCO DE TESTES#
 
     try:
@@ -25,9 +26,13 @@ def cobranca_automatizada():
         #logando e-mail
         servidor_email.login(creds_remet['usuario'], creds_remet['senha'])
 
+        creds_remet = creds_remet['usuario']
         for _, registro in tqdm(df.iterrows(), total=len(df)):
+            emails_dest = tratar_email(registro['email_cli'])
+            num_nota = registro['num_titulo']
+            data = data_venc(registro['dt_vencimento'])
 
-            enviar_email_5_dias_atraso(servidor_email, creds_remet, registro['email_cli'], registro['num_titulo'], registro['dt_vencimento'])
+            enviar_email_5_dias_atraso(servidor_email, creds_remet, emails_dest, num_nota, data)
     
     except Exception as e:
         print(f"Erro ao enviar e-mail: {e}")

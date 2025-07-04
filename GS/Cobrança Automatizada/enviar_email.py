@@ -2,13 +2,8 @@ import smtplib
 from email.mime.text import MIMEText
 from data_venc import data_venc
 
-def enviar_email_5_dias_atraso(servidor_email, creds_remet, email_dest, num_nota, data):
-    #OBS.: HAVERÁ UM FOR PARA ENVIAR PARA TODOS OS DEVEDORES CAPTURADOS NA CONSULTA SQL
-    #criando o corpo do e-mail
-    remetente = creds_remet['usuario']
-    destinatarios = "".join(email_dest.split()).split(";")
-    data = data_venc(data) #transforma a data advinda em uma string da data
-
+def enviar_email_5_dias_atraso(servidor_email, remetente, email_dest, num_nota, data):
+    
     #DEFININDO O CORPO DO E-MAIL
     conteudo = f"""Prezado(a), boa tarde!
 
@@ -28,19 +23,13 @@ Singular Facilities
 Em caso de dúvidas, entre em contato conosco (85) 98998-3984"""
     conteudo = MIMEText(conteudo, "plain")
     conteudo["Subject"] = f"Pendência Financeira - Nota Fiscal nº {num_nota}"
-    conteudo["From"] = creds_remet['usuario']
+    conteudo["From"] = remetente
 
-    servidor_email.sendmail(remetente, destinatarios, conteudo.as_string())
+    servidor_email.sendmail(remetente, email_dest, conteudo.as_string())
 
 
 
-def enviar_email_2_dias_antes(servidor_email, creds_remet, email_dest, num_nota, data):
-
-    #OBS.: HAVERÁ UM FOR PARA ENVIAR PARA TODOS OS DEVEDORES CAPTURADOS NA CONSULTA SQL
-    #criando o corpo do e-mail
-    remetente = creds_remet['usuario'] 
-    destinatarios = "".join(email_dest.split()).split(";")
-    data = data_venc(data) #transforma a data advinda em uma string da data
+def enviar_email_2_dias_antes(servidor_email, remetente, email_dest, num_nota, data):
 
     #DEFININDO O CORPO DO E-MAIL
     conteudo = f"""Prezado(a), Boa tarde!
@@ -61,6 +50,6 @@ Em caso de dúvidas, entre em contato conosco (85) 98998-3984"""
        
     conteudo = MIMEText(conteudo, "plain")
     conteudo["Subject"] = f"Sua nota fiscal de nº {num_nota} vence em 2 dias"
-    conteudo["From"] = creds_remet['usuario']
+    conteudo["From"] = remetente
 
-    servidor_email.sendmail(remetente, destinatarios, conteudo.as_string())
+    servidor_email.sendmail(remetente, email_dest, conteudo.as_string())
