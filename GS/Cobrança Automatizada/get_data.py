@@ -26,7 +26,7 @@ def get_data_atraso_5_dias(server, user, password, database):
             SE1.E1_TIPO AS TIPO, 
             SA1.A1_CGC AS CNPJ_CLI, 
             SA1.A1_NOME AS DESC_CLI,
-            SA1.A1_EMAIL AS EMAIL_CLI,
+            SA1.A1_XEMAILF AS EMAIL_CLI,
             SE1.E1_BAIXA AS DT_BAIXA,
             SE1.E1_EMISSAO AS DT_EMISSAO, -- usar como principal para DRE
             SE1.E1_VENCTO AS DT_VENCIMENTO
@@ -89,7 +89,7 @@ def get_data_2_dias_antes(server, user, password, database):
             SE1.E1_TIPO AS TIPO, 
             SA1.A1_CGC AS CNPJ_CLI, 
             SA1.A1_NOME AS DESC_CLI,
-            SA1.A1_EMAIL AS EMAIL_CLI,
+            SA1.A1_XEMAILF AS EMAIL_CLI,
             SE1.E1_BAIXA AS DT_BAIXA,
             SE1.E1_EMISSAO AS DT_EMISSAO, -- usar como principal para DRE
             SE1.E1_VENCTO AS DT_VENCIMENTO
@@ -109,7 +109,7 @@ def get_data_2_dias_antes(server, user, password, database):
             WHERE SE1.E1_TIPO IN ('NF') 
             AND SE1.D_E_L_E_T_ = ''
             AND SE1.E1_FILIAL NOT IN ('020101', '030101','050101','060101')
-            AND SE1.E1_VENCTO BETWEEN GETDATE() AND GETDATE()+2
+            AND SE1.E1_VENCTO BETWEEN GETDATE()+1 AND GETDATE()+2
             AND SE1.E1_BAIXA = ''
             AND LEFT(SE1.E1_FILIAL,2) = '01'
             """)
