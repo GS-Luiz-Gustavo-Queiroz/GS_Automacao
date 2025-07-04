@@ -164,18 +164,18 @@ def salva_relatorio(row: List[List]):
     SAMPLE_SPREADSHEET_ID = "15gGHm67_W5maIas-4_YPSzE6R5f_CNJGcza_BJFlNBk"  # Código da planilha
     SAMPLE_RANGE_NAME = "Página1!A{}:D1000"  # Intervalo que será lido
     creds = None
-    if os.path.exists("configs/token.json"):
-        creds = Credentials.from_authorized_user_file("configs/token.json", SCOPES)
+    if os.path.exists("configs/creds/token.json"):
+        creds = Credentials.from_authorized_user_file("configs/creds/token.json", SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                "configs/client_secret.json", SCOPES
+                "configs/creds/client.json", SCOPES
             )
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open("configs/token.json", "w") as token:
+        with open("configs/creds/token.json", "w") as token:
             token.write(creds.to_json())
 
     try:
@@ -235,7 +235,7 @@ def pdf_to_img(path: str, sizes: Dict, page: int = 0) -> None:
     page = pdf_document.load_page(page)  # Carrega a página.
     image = page.get_pixmap()  # Converte a página num objeto de imagem.
     image.save('img.jpg')  # Salva a imagem num arquivo.
-    pdf_document.close()  # Fechar o PDF para garantir que o arquivo seja liberado
+    pdf_document.close()  # Fechar o PDF para garantir que o arquivo seja liberado.
     image = Image.open('img.jpg')
     if image.size in sizes:
         nome = image.crop(sizes[image.size][0])
