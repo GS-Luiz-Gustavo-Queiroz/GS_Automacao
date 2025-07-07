@@ -6,8 +6,13 @@ from enviar_email import enviar_email_5_dias_atraso
 from data_venc import data_venc
 from tqdm import tqdm
 from tratar_email import tratar_email
+from salvar_relatorio import salvar_relatorio
+from datetime import datetime
+import time
 
 def cobranca_automatizada():
+    tempo_inicio = time.time() #guarda o tempo de inicio de execução do codigo
+    
     creds_db = ler_credenciais_db()
     df = get_data_atraso_5_dias(creds_db['server'], creds_db['username'], creds_db['password'], creds_db['database'])
 
@@ -38,5 +43,11 @@ def cobranca_automatizada():
         print(f"Erro ao enviar e-mail: {e}")
     finally:
         servidor_email.quit()
+    
+    tempo_fim = time.time()
+    exec_time = tempo_fim - tempo_inicio  # Calcula o tempo de execução do código.
+    data = datetime.now().strftime("%d/%m/%Y")
+    values = [[data, 'Cobrança automatizada 5 dias antes', len(df), exec_time]]  # Valores para serem salvos no relatório.
+    salvar_relatorio(values)
 
 cobranca_automatizada()
