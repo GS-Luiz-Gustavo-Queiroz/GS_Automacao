@@ -1,8 +1,6 @@
 import pandas as pd
 import smtplib
 from ler_credenciais import ler_credenciais_remet, ler_credenciais_db
-from get_data import get_data_2_dias_antes
-from enviar_email import enviar_email_2_dias_antes
 from data_venc import data_venc
 from tqdm import tqdm
 from tratar_email import tratar_email
@@ -10,11 +8,14 @@ from salvar_relatorio import salvar_relatorio
 from datetime import datetime
 import time
 
-def cobranca_automatizada():
+#get_data é a função referente a captura de dados de acordo com o necessário (ex.:2 dias antes do venc)
+#enviar_email é a função referente ao envio de e-mail de acordo com o necessário (com adiantamento ou atraso)
+def cobranca_automatizada(get_data, enviar_email): 
+
     tempo_inicio = time.time() #guarda o tempo de inicio de execução do codigo
     
     creds_db = ler_credenciais_db()
-    df = get_data_2_dias_antes(creds_db['server'], creds_db['username'], creds_db['password'], creds_db['database'])
+    df = get_data(creds_db['server'], creds_db['username'], creds_db['password'], creds_db['database'])
 
     creds_remet = ler_credenciais_remet()
 
@@ -37,7 +38,7 @@ def cobranca_automatizada():
             num_nota = registro['num_titulo']
             data = data_venc(registro['dt_vencimento'])
 
-            enviar_email_2_dias_antes(servidor_email, creds_remet, emails_dest, num_nota, data)
+            enviar_email(servidor_email, creds_remet, emails_dest, num_nota, data)
     
     except Exception as e:
         print(f"Erro ao enviar e-mail: {e}")
@@ -49,5 +50,3 @@ def cobranca_automatizada():
     data = datetime.now().strftime("%d/%m/%Y")
     values = [[data, 'Cobrança automatizada 2 dias antes', len(df), exec_time]]  # Valores para serem salvos no relatório.
     salvar_relatorio(values)
-
-cobranca_automatizada()

@@ -1,7 +1,7 @@
 import pymssql
 import pandas as pd
 
-def get_data_atraso_5_dias(server, user, password, database):
+def get_data_5_dias_atraso(server, user, password, database):
     try:
         # Cria a conexão.
         conn = pymssql.connect(server=server, user=user,
