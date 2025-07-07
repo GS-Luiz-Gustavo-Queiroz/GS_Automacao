@@ -107,6 +107,7 @@ class Aut_Spx:
                     pass
 
     def run(self) -> None:
+        init_dir()
         self.login()
         self.troca_empresa()
         sleep(2)
@@ -158,7 +159,7 @@ class Aut_Spx:
 
     def baixa_boletos(self) -> None:
         # Salva todos os boletos da página.
-        botoes = self.nav.find_elements(By.XPATH, '//tr[@id="linha"]//a[i[contains(@class, "fa-print")]]')
+        botoes = self.nav.find_elements(By.XPATH, '//div[@class="btn-group"]/a[contains(@href, "javascript:gerarRelatorioBoleto")]')
         for botao in botoes:
             self.nav.execute_script("arguments[0].scrollIntoView(true);", botao)
             WebDriverWait(self.nav, 10).until(EC.element_to_be_clickable(botao))
