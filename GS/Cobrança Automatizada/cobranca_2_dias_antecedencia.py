@@ -1,5 +1,0 @@
-from get_data import get_data_2_dias_antes
-from enviar_email import enviar_email_2_dias_antes
-from cobranca_automatizada import cobranca_automatizada
-
-cobranca_automatizada(get_data_2_dias_antes, enviar_email_2_dias_antes)

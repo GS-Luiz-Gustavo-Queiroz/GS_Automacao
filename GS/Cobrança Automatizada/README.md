@@ -1,4 +1,5 @@
-A sequência de chamada de função é a seguinte:
-1 - Na main (ou de 5 dias de atraso ou de 2 dias antes do atraso) a função cobranca_automatizada chama as funções de leitura de credenciais do banco de dados e os dados do remetente em arquivos de texto na pasta configs.
-2 - Após isso, ainda na função cobranca_automatizada os dados seram capturados com a funcao get_data (de atraso de 5 dias ou 2 dias antes do atraso).
-3 - Teremos então um loop para enviar um e-mail para cada cliente que está com pendência, então apenas tratamos a data que tem no registro de pendencia com a funcao data_venc e então mandamos o e-mail com a funcao enviar_email (de atraso de 5 dias ou 2 dias antes do atraso).
+#### O programa funciona da seguinte maneira:
+1 - O arquivo principal é 'main_cobranca.py' no qual chama a função cobranca automatizada(num_dias) no qual o parâmetro num_dias é a quantidade de dias de vencimento sendo um valor positivo dias que faltam para vencer, e negativo dias que já passaram do vencimento.
+2 - No arquivo 'cobranca_automatizada.py' é implementada a função cobranca_automatizada(), na qual:
+    - lê os dados do banco de dados dos registros de pagamentos pendentes de acordo com os dias passados como parâmetro.
+    - para cada registro de pagamento pendente envia um e-mail para o cliente realizando a cobrança.

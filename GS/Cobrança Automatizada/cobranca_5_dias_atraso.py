@@ -1,5 +1,0 @@
-from get_data import get_data_5_dias_atraso
-from enviar_email import enviar_email_5_dias_atraso
-from cobranca_automatizada import cobranca_automatizada
-
-cobranca_automatizada(get_data_5_dias_atraso, enviar_email_5_dias_atraso)

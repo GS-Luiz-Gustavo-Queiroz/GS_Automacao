@@ -1,8 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
-from data_venc import data_venc
 
-def enviar_email_5_dias_atraso(servidor_email, remetente, email_dest, num_nota, data):
+def enviar_email_cobranca_atrasada(servidor_email, remetente, email_dest, num_nota, data, dias):
     
     #DEFININDO O CORPO DO E-MAIL
     conteudo = f"""Prezado(a), boa tarde!
@@ -29,7 +28,7 @@ Em caso de dúvidas, entre em contato conosco (85) 98998-3984"""
 
 
 
-def enviar_email_2_dias_antes(servidor_email, remetente, email_dest, num_nota, data):
+def enviar_email_cobranca_adiantada(servidor_email, remetente, email_dest, num_nota, data, dias):
 
     #DEFININDO O CORPO DO E-MAIL
     conteudo = f"""Prezado(a), Boa tarde!
@@ -49,7 +48,17 @@ Singular Facilities
 Em caso de dúvidas, entre em contato conosco (85) 98998-3984"""
        
     conteudo = MIMEText(conteudo, "plain")
-    conteudo["Subject"] = f"Sua nota fiscal de nº {num_nota} vence em 2 dias"
+    if(dias == 0):
+        conteudo["Subject"] = f"Sua nota fiscal de nº {num_nota} vence hoje!"
+    else:
+        conteudo["Subject"] = f"Sua nota fiscal de nº {num_nota} vence em {dias} dias"
     conteudo["From"] = remetente
 
     servidor_email.sendmail(remetente, email_dest, conteudo.as_string())
+
+
+def enviar_email(servidor_email, remetente, email_dest, num_nota, data, dias):
+    if(dias>=0):
+        enviar_email_cobranca_adiantada(servidor_email, remetente, email_dest, num_nota, data, dias)
+    else:
+        enviar_email_cobranca_atrasada(servidor_email, remetente, email_dest, num_nota, data, dias)
