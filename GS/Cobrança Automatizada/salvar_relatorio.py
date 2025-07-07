@@ -9,7 +9,7 @@ import os
 def salvar_relatorio(row: List[List]):
         SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
         SAMPLE_SPREADSHEET_ID = "15gGHm67_W5maIas-4_YPSzE6R5f_CNJGcza_BJFlNBk"  # Código da planilha
-        SAMPLE_RANGE_NAME = "Página1!A{}:D15000"  # Intervalo que será lido
+        SAMPLE_RANGE_NAME = "Página1!A{}:D100000"  # Intervalo que será lido
         creds = None
         if os.path.exists("configs/token.json"):
             creds = Credentials.from_authorized_user_file("configs/token.json", SCOPES)
