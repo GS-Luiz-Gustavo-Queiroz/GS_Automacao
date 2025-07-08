@@ -35,11 +35,16 @@ for arquivo in tqdm(arquivos_pdf, total=len(arquivos_pdf)):
         
         razao_social = text[pos_inicial_razao_social:pos_final_razao_social]
 
+        #BUSCAR CNPJ
+        cnpj = text.find("CPF/CNPJ: ") + len("CPF/CNPJ: ")
+        cnpj = text[cnpj:cnpj+18]
+        cnpj = cnpj.replace("/", "_")
+
     try:
         pasta_atual = os.getcwd()
         caminho_arquivo = os.path.join(pasta_atual, "BALNEARIO CAMBURIU", arquivo)
         caminho_arquivo = os.path.abspath(caminho_arquivo)
-        novo_nome = os.path.join(pasta_atual, "BALNEARIO CAMBURIU", f"{razao_social}_{num_nota}.pdf")
+        novo_nome = os.path.join(pasta_atual, "BALNEARIO CAMBURIU", f"NF {razao_social} - {cnpj}.pdf")
         novo_nome = os.path.abspath(novo_nome)
         shutil.copyfile(caminho_arquivo, novo_nome)
         os.remove(caminho_arquivo)
