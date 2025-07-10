@@ -52,6 +52,8 @@ class Aut:
                     EMP.Nome,
                     PED.EST_Codigo,
                     EST.Nome AS EST_Nome,
+                    FRN.NOME AS FORNECEDOR,
+                    EST.CNPJCPF AS CNPJ,
                     CASE
                         WHEN PED.STATUS = 2 THEN 'REJEITADO'
                         WHEN PED.STATUS = 1 THEN 'APROVADO'
@@ -66,6 +68,8 @@ class Aut:
                     END AS DT_VENCIMENTO,
                     DPE.[Path] AS CAMINHO_ARQUIVO,
                     PED.CondicaoPagamento AS CONDICAO_PAGAMENTO,
+                    CPG.DOCUMENTO AS DOC,
+                    CPG.ValorBruto AS VALOR_BRUTO,
                     PED.CODIGO AS CODIGO_PEDIDO,
                     CONCAT(CPG.Codigo, ENT.CPG_CODIGO) AS CODIGO_CONTAS_PAGAR,
                     CONCAT( VCP.Sequencial, VCP_ENT.Sequencial ) AS SEQUENCIAL_CONTAS_PAGAR,
@@ -79,36 +83,23 @@ class Aut:
                             THEN 'PEDIDO COM NOTA'
                         ELSE 'PEDIDO AVULSO'
                     END AS TIPO_PEDIDO    
-                FROM PED
-                LEFT JOIN DPE
-                    ON DPE.EMP_Codigo = PED.EMP_CODIGO AND DPE.PED_Codigo = PED.CODIGO
-                LEFT JOIN CPG
-                    ON CPG.EMP_Codigo = PED.EMP_CODIGO AND CPG.Codigo = PED.CPG_CODIGO
-                LEFT JOIN VCP
-                    ON VCP.EMP_Codigo = CPG.EMP_Codigo AND VCP.CPG_Codigo = CPG.Codigo
-                LEFT JOIN EST
-                    ON EST.EMP_Codigo = PED.EMP_Codigo AND EST.Codigo = PED.EST_Codigo
-                LEFT JOIN EMP
-                    ON EST.EMP_Codigo = EMP.Codigo
-                LEFT JOIN ENT
-                    ON
-                        ENT.EMP_Codigo = PED.EMP_CODIGO
-                        AND ENT.PED_CODIGO = PED.CODIGO
-                LEFT JOIN CPG AS CPG_ENT
-                    ON
-                        CPG_ENT.EMP_CODIGO = ENT.EMP_CODIGO
-                        AND CPG_ENT.CODIGO = ENT.CPG_CODIGO
-                LEFT JOIN VCP AS VCP_ENT
-                    ON 
-                        VCP_ENT.EMP_Codigo = CPG_ENT.EMP_Codigo 
-                        AND VCP_ENT.CPG_Codigo = CPG_ENT.Codigo;
+                FROM PED	
+                LEFT JOIN DPE 				 ON DPE.EMP_Codigo = PED.EMP_CODIGO 				AND DPE.PED_Codigo = PED.CODIGO
+                LEFT JOIN CPG 				 ON CPG.EMP_Codigo = PED.EMP_CODIGO 				AND CPG.Codigo = PED.CPG_CODIGO
+                LEFT JOIN VCP 				 ON VCP.EMP_Codigo = CPG.EMP_Codigo 				AND VCP.CPG_Codigo = CPG.Codigo
+                LEFT JOIN EST 				 ON EST.EMP_Codigo = PED.EMP_Codigo 				AND EST.Codigo = PED.EST_Codigo
+                LEFT JOIN EMP 				 ON EST.EMP_Codigo = EMP.Codigo
+                LEFT JOIN ENT 				 ON ENT.EMP_Codigo = PED.EMP_CODIGO         AND ENT.PED_CODIGO = PED.CODIGO
+                LEFT JOIN CPG CPG_ENT  ON CPG_ENT.EMP_CODIGO = ENT.EMP_CODIGO     AND CPG_ENT.CODIGO = ENT.CPG_CODIGO
+                LEFT JOIN VCP VCP_ENT  ON VCP_ENT.EMP_Codigo = CPG_ENT.EMP_Codigo AND VCP_ENT.CPG_Codigo = CPG_ENT.Codigo
+                LEFT JOIN FRN          ON PED.EMP_Codigo = FRN.EMP_Codigo			    AND PED.FRN_Codigo = FRN.Codigo;
                 """)
             """
                 Criação de uma lista que irá guardar os resultados da consulta, onde cada item do dicionário será
             um dicionário, com as chaves 'ped_codigo', que é o código do pedido, e 'path' que é o caminho até o arquivo
             referente ao pedido.
             """
-            columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'status','dt_pedido', 'dt_vencimento', 'path', 'cond_pag', 'cod_ped', 'COD_cpg', 'sequencial', 'cont_avuls', 'form_pag', 'nota', 'setor', 'tipo', 'tipo_pedido']
+            columns = ['Grupo', 'EST_Codigo', 'EST_nome', 'fornecedor', 'cnpj', 'status','dt_pedido', 'dt_vencimento', 'path', 'cond_pag', 'num_nota', 'valor', 'cod_ped', 'COD_cpg', 'sequencial', 'cont_avuls', 'form_pag', 'nota', 'setor', 'tipo', 'tipo_pedido']
             df = pd.DataFrame(cursor.fetchall(), columns=columns)
             # df.to_excel("todas_contas_a_pagar.xlsx", index=False)
             # filtra os dados com valores de vencimento igual ao especificado
@@ -124,11 +115,11 @@ class Aut:
             qtdd_arquivos = len(df['cod_ped'])
             qtdd_pedidos = len(df['cod_ped'].unique())
 
-            self.informes.append(f"Quantidade de pedidos: {qtdd_pedidos}")
-            self.informes.append(f"Quantidade de arquivos copiados: {qtdd_arquivos}")
+            # self.informes.append(f"Quantidade de pedidos: {qtdd_pedidos}")
+            # self.informes.append(f"Quantidade de arquivos copiados: {qtdd_arquivos}")
 
-            print(f"Quantidade de pedidos: {qtdd_pedidos}")
-            print(f"Quantidade de arquivos a serem copiados: {qtdd_arquivos}")
+            # print(f"Quantidade de pedidos: {qtdd_pedidos}")
+            # print(f"Quantidade de arquivos a serem copiados: {qtdd_arquivos}")
             #FIM DO CODIGO DO LOG
 
             return df
@@ -159,7 +150,7 @@ class Aut:
         values = [[data, 'Contas a Pagar', len(self.df), exec_time]]  # Valores para serem salvos no relatório.
         self.salva_relatorio(values)
         self.mostra_erros()
-        self.mostra_informes()
+        # self.mostra_informes()
 
     def filtra_data(self, df: pd.DataFrame) -> pd.DataFrame:
         data = pd.to_datetime(self.vencimento, format="%d/%m/%Y")
@@ -180,20 +171,32 @@ class Aut:
                     estabelecimento: str = row['EST_nome']
                     vencimento: str = row['dt_vencimento']
                     cod_cpg: str = row['COD_cpg']
+                    cnpj: str = row['cnpj']
+                    data = self.vencimento.replace("/", "-")
+                    valor = row['valor']
+                    fornecedor = row['fornecedor']
+                    num_nota = row['num_nota']
+
                     dir_grupo: str = f'{self.dir_dest}/{grupo}'
-                    dir_est: str = f'{dir_grupo}/{estabelecimento}'
+                    dir_est: str = f'{dir_grupo}/{estabelecimento} - {cnpj}'
                     dir_ven: str = f'{dir_est}/{vencimento}'
+                    
                     # Verifica se já existe a pasta do grupo, estabelecimento e vencimento.
                     self.init_dir(dir_grupo)
                     self.init_dir(dir_est)
                     self.init_dir(dir_ven)
+
                     # Define o novo caminho do arquivo.
                     nome = path.split('\\')[-1]  # Acessa o nome do arquivo.
                     extensao = nome[nome.rfind('.'):]  # Acessa a extensão do arquivo.
                     nome = nome[:nome.rfind('.')]  # Remove a extensão do nome do arquivo.
                     # Define o nome junto do codigo do CPG, nome antigo e o vencimento.
-                    novo_nome = f'{cod_cpg} - {nome} - {vencimento}{extensao}'
+                    # novo_nome = f'{cod_cpg} - {nome} - {vencimento}{extensao}'
+                    novo_nome = f'{grupo} - R$ {valor} - {fornecedor} - {num_nota}{extensao}'.replace("/", "")
                     new_path = f'{dir_ven}/{novo_nome}'  # Junta o novo nome com o diretório de destino do vencimento.
+                    new_path = os.path.join(new_path)
+                    new_path = '\\\\?\\' + os.path.abspath(new_path)
+
                     try:
                         shutil.copy(path, new_path)
                         break
@@ -202,14 +205,17 @@ class Aut:
                         # Então vai ser tentado apenas diminuir o tamanho do arquivo.
                         # O i cria um id para os arquivos, para não haver arquivos de mesmo nome.
                         i = len(os.listdir(dir_ven))
-                        novo_nome = f'{dir_ven}/{cod_cpg}-{i}-{vencimento}{extensao}'
+                        novo_nome = f'{dir_ven}/R$ {valor} - {fornecedor} - {num_nota}({i}){extensao}'.replace("/", "")
+                        new_path = os.path.join(novo_nome)
+                        new_path = '\\\\?\\' + os.path.abspath(new_path)
                         try:
-                            shutil.copy(path, novo_nome)
+                            shutil.copy(path, new_path)
                         except FileNotFoundError:
                             # Se o erro persistir, o arquivo será ignorado.
                             self.erros.append([path, new_path])
                     except PermissionError:
                         self.erros.append(['Permissão negada', path])
+
                 else:
                     self.erros.append(['não encontrado', path_orig])
             except:
