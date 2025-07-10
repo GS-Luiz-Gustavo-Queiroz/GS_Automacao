@@ -36,3 +36,7 @@ GS/Operacoes em PDF/_Manipulador de PDF/configs/utils/functions/__pycache__/
 *.ODT
 *.XMLD
 *.HTML
+
+**/build/
+**/dist/
+GS/Contas a Pagar/Arquivos
