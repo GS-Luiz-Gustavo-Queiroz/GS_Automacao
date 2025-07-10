@@ -1,7 +1,7 @@
 from configs.utils.update_functions import check_update
 from configs.utils.menu_functions import main_hub
 
-VERSION: str = '1.0.3'
+VERSION: str = '1.0.4'
 
 
 def run():
