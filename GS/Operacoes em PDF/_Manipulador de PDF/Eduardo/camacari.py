@@ -51,20 +51,62 @@ nome2 = "2.1NF ASSOC. CONDOMINIO PARAISO DOS LAGOS.PDF"
 nome3 = "3.1NF CAPRI FATOR TOWER.PDF"
 nome4 = "3.1NF CONDOMINIO PEDRA DO SAL RESIDENCIAS.PDF"
 nome5 = "4.1NF CENTRAL PARK-SOHO.PDF"
-with open(f"CAMACARI/{nome3}", "rb") as pdf_nota_fiscal:
-        #LEITURA DO TEXTO DO PDF
-        pdf_reader = PdfReader(pdf_nota_fiscal)
-        page = pdf_reader.pages[0]
-        text = page.extract_text()
-        print(text)
+listanf = [nome1, nome2, nome3, nome4, nome5]
 
-        #BUSCAR NUMERO DA NOTA
-        pos_inicial_nota = text.find("Número da Nota") + len("Número da Nota") + 1
-        pos_final_nota = pos_inicial_nota
-        while(text[pos_final_nota]!= '\n'):
-            pos_final_nota += 1
-        
-        print(text[pos_inicial_nota:pos_final_nota])
+for arquivo in listanf:
+    with open(f"CAMACARI/{arquivo}", "rb") as pdf_nota_fiscal:
+            #LEITURA DO TEXTO DO PDF
+            pdf_reader = PdfReader(pdf_nota_fiscal)
+            page = pdf_reader.pages[0]
+            text = page.extract_text()
+            # print(text)
 
-        #BUSCAR RAZAO SOCIAL
-        
+            #BUSCAR NUMERO DA NOTA
+            pos_inicial_nota = text.find("Número da Nota") + len("Número da Nota") + 1
+            pos_final_nota = pos_inicial_nota
+            while(text[pos_final_nota]!= '\n'):
+                pos_final_nota += 1
+            
+            num_nota = text[pos_inicial_nota:pos_final_nota]
+            print(num_nota)
+
+            #BUSCAR CNPJ
+            pos_inicial_cnpj = text.find("Logradouro:")
+            for cnpj in re.finditer("Logradouro:", text):
+                pos_inicial_cnpj = cnpj.start()
+            pos_inicial_cnpj = pos_inicial_cnpj + len("Logradouro:")
+
+            pos_final_cnpj = pos_inicial_cnpj
+            
+            #BLOCO DE TESTE
+            cnpj = text[pos_inicial_cnpj:pos_final_cnpj+1].replace(".", "").replace("/", "").replace("-", "")
+
+            try:
+                while True:
+                    int(cnpj)
+                    pos_final_cnpj += 1
+                    cnpj = text[pos_inicial_cnpj:pos_final_cnpj+1].replace(".", "").replace("/", "").replace("-", "")
+            except:
+                pass
+            #FIM BLOCO DE TESTE
+
+            # while text[pos_final_cnpj] != " ":
+            #      pos_final_cnpj += 1
+            
+            cnpj = text[pos_inicial_cnpj:pos_final_cnpj].replace("/", "_")
+
+            print(cnpj)
+
+            #BUSCAR RAZAO SOCIAL
+            if (text[pos_final_cnpj-1] == " "): #se tiver inscricao municipal entre cnpj e razao social
+                pos_inicial_razao_social = pos_final_cnpj + 10
+                pos_final_razao_social = pos_inicial_razao_social
+            else: #se depois do cnpj ja tiver razao social
+                pos_inicial_razao_social = pos_final_cnpj
+                pos_final_razao_social = pos_inicial_razao_social
+
+            while text[pos_final_razao_social] != "\n":
+                pos_final_razao_social += 1
+
+            razao_social = text[pos_inicial_razao_social:pos_final_razao_social]
+            print(razao_social)
