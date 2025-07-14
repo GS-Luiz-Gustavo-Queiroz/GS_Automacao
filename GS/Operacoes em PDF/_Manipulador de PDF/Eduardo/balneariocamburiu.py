@@ -7,13 +7,14 @@ import shutil
 from tqdm import tqdm
 
 pasta_blaneario_camburiu = os.getcwd()
-pasta_blaneario_camburiu = os.path.join(pasta_blaneario_camburiu, "BALNEARIO CAMBURIU")
+pasta_blaneario_camburiu = os.path.join(pasta_blaneario_camburiu, "NFs/BALNEARIO CAMBURIU")
 pasta_blaneario_camburiu = os.path.abspath(pasta_blaneario_camburiu)
 arquivos_pdf = os.listdir(pasta_blaneario_camburiu)
+print(pasta_blaneario_camburiu)
 
 for arquivo in tqdm(arquivos_pdf, total=len(arquivos_pdf)):
 
-    with open(f"BALNEARIO CAMBURIU/{arquivo}", "rb") as pdf_nota_fiscal:
+    with open(f"{pasta_blaneario_camburiu}/{arquivo}", "rb") as pdf_nota_fiscal:
         #LEITURA DO TEXTO DO PDF
         pdf_reader = PdfReader(pdf_nota_fiscal)
         page = pdf_reader.pages[0]
@@ -42,11 +43,11 @@ for arquivo in tqdm(arquivos_pdf, total=len(arquivos_pdf)):
 
     try:
         pasta_atual = os.getcwd()
-        caminho_arquivo = os.path.join(pasta_atual, "BALNEARIO CAMBURIU", arquivo)
+        caminho_arquivo = os.path.join(pasta_blaneario_camburiu, arquivo)
         caminho_arquivo = os.path.abspath(caminho_arquivo)
-        novo_nome = os.path.join(pasta_atual, "BALNEARIO CAMBURIU", f"NF {razao_social} - {cnpj}.pdf")
+        novo_nome = os.path.join(pasta_blaneario_camburiu, f"NF {razao_social} - {cnpj}.pdf")
         novo_nome = os.path.abspath(novo_nome)
-        shutil.copyfile(caminho_arquivo, novo_nome)
-        os.remove(caminho_arquivo)
+        # shutil.copyfile(caminho_arquivo, novo_nome)
+        os.rename(caminho_arquivo, novo_nome)
     except:
         pass
