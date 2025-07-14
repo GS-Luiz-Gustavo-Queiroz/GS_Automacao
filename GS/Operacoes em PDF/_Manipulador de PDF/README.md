@@ -4,3 +4,5 @@
     - Camaçari
     - Lauro de Freitas
     - Balneário Camburiu
+ 
+ - Renomeação de NFs com imagem:
