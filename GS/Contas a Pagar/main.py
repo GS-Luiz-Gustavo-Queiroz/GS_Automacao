@@ -13,6 +13,10 @@ import shutil
 import psutil
 import time
 import os
+import ctypes
+
+#para adicionar um título ao console do executável
+ctypes.windll.kernel32.SetConsoleTitleW("Contas a Pagar")
 
 
 class Aut:
@@ -192,7 +196,8 @@ class Aut:
                     nome = nome[:nome.rfind('.')]  # Remove a extensão do nome do arquivo.
                     # Define o nome junto do codigo do CPG, nome antigo e o vencimento.
                     # novo_nome = f'{cod_cpg} - {nome} - {vencimento}{extensao}'
-                    novo_nome = f'{grupo} - R$ {valor} - {fornecedor} - {data[3:]}{extensao}'.replace("/", "")
+                    i = len(os.listdir(dir_ven))
+                    novo_nome = f'{grupo} - R$ {valor} - {fornecedor} - {data[3:]} - ({i+1}){extensao}'.replace("/", "")
                     new_path = f'{dir_ven}/{novo_nome}'  # Junta o novo nome com o diretório de destino do vencimento.
                     new_path = os.path.join(new_path)
                     new_path = '\\\\?\\' + os.path.abspath(new_path)
@@ -205,7 +210,7 @@ class Aut:
                         # Então vai ser tentado apenas diminuir o tamanho do arquivo.
                         # O i cria um id para os arquivos, para não haver arquivos de mesmo nome.
                         i = len(os.listdir(dir_ven))
-                        novo_nome = f'{dir_ven}/{grupo} - R$ {valor} - {fornecedor} - {data[3:]}({i}){extensao}'.replace("/", "")
+                        novo_nome = f'{dir_ven}/{grupo} - R$ {valor} - {fornecedor} - {data[3:]}({i+1}){extensao}'.replace("/", "")
                         new_path = os.path.join(novo_nome)
                         new_path = '\\\\?\\' + os.path.abspath(new_path)
                         try:
