@@ -28,7 +28,7 @@ def cobranca_automatizada(dias):
 
     try:
         #configurando servidor de e-mail
-        servidor_email = smtplib.SMTP('smtp.gmail.com', 587)
+        servidor_email = smtplib.SMTP('email-ssl.com.br', 587)
         #iniciando servidor de e-mail
         servidor_email.starttls()
         #logando e-mail
